@@ -1,0 +1,23 @@
+{
+    "name": "mitoop/laravel-api-response",
+    "type": "library",
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.10"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Mitoop\\Response\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mitoop",
+            "email": "me@mitoop.com"
+        }
+    ]
+}
