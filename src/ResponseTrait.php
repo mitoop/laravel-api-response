@@ -1,6 +1,6 @@
 <?php
 
-namespace Mitoop\Response;
+namespace Mitoop\Http;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\Response;
 
-trait APIResponseTrait
+trait ResponseTrait
 {
     protected function success($data = null, $message = 'success'): JsonResponse
     {
@@ -21,17 +21,17 @@ trait APIResponseTrait
             $data = null;
         }
 
-        return $this->sendResponse($data, $message, APIResponseCode::SUCCESS);
+        return $this->sendResponse($data, $message, ResponseCode::SUCCESS);
     }
 
-    protected function error($message = 'error', $data = null, $code = APIResponseCode::ERROR): JsonResponse
+    protected function error($message = 'error', $data = null, $code = ResponseCode::ERROR): JsonResponse
     {
         return $this->sendResponse($data, $message, $code);
     }
 
     protected function unauthenticatedError($message = '登录信息已过期, 请重新登录！'): JsonResponse
     {
-        return $this->error(message: $message, code: APIResponseCode::UNAUTHENTICATED);
+        return $this->error(message: $message, code: ResponseCode::UNAUTHENTICATED);
     }
 
     protected function pagingSuccess(Paginator $paginator, $meta = [], $message = 'success'): JsonResponse
@@ -52,7 +52,7 @@ trait APIResponseTrait
 
         $meta = array_merge($meta, $pageMeta);
 
-        return $this->sendResponse($data, $message, APIResponseCode::SUCCESS, $meta);
+        return $this->sendResponse($data, $message, ResponseCode::SUCCESS, $meta);
     }
 
     private function sendResponse($data, $message, $code, $meta = null): JsonResponse

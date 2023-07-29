@@ -1,8 +1,8 @@
 <?php
 
-namespace Mitoop\Response;
+namespace Mitoop\Http;
 
-enum APIResponseCode: int
+enum ResponseCode: int
 {
     case SUCCESS = 0;
     case ERROR = 1;
