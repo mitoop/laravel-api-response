@@ -3,7 +3,6 @@
 namespace Mitoop\Http\Resources;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Mitoop\Http\ResponseCode;
 
@@ -21,12 +20,10 @@ class Resource extends JsonResource
         return $this->encoding(parent::toResponse($request));
     }
 
-    public static function collection($resource): AnonymousResourceCollection
+    protected static function newCollection($resource)
     {
-        $collection = parent::collection($resource);
-
-        $collection->with = (new self([]))->with;
-
-        return $collection;
+        return tap(new AnonymousResourceCollection($resource, static::class), function ($collection) {
+            $collection->with = (new self([]))->with;
+        });
     }
 }
