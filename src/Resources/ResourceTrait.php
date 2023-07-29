@@ -2,15 +2,8 @@
 
 namespace Mitoop\Http\Resources;
 
-use Mitoop\Http\ResponseCode;
-
 trait ResourceTrait
 {
-    public $with = [
-        'code' => ResponseCode::SUCCESS,
-        'message' => 'success',
-    ];
-
     public function withMessage($message): ResourceCollection
     {
         $this->with['message'] = $message;
