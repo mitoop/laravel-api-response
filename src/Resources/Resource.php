@@ -2,7 +2,6 @@
 
 namespace Mitoop\Http\Resources;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Mitoop\Http\ResponseCode;
 
@@ -14,11 +13,6 @@ class Resource extends JsonResource
         'code' => ResponseCode::SUCCESS,
         'message' => 'success',
     ];
-
-    public function toResponse($request): JsonResponse
-    {
-        return $this->encoding(parent::toResponse($request));
-    }
 
     protected static function newCollection($resource)
     {

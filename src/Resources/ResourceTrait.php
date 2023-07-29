@@ -11,8 +11,8 @@ trait ResourceTrait
         return $this;
     }
 
-    protected function encoding($response)
+    public function jsonOptions(): int
     {
-        return $response->setEncodingOptions(JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES);
+        return JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES;
     }
 }
