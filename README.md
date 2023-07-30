@@ -70,12 +70,13 @@ class Controller extends BaseController
 
 #### 可用方法
 
-包含方法 `success`, `error`, `unauthenticatedError` 三个方法
+包含方法 `success`, `error`, `unauthenticatedError` 三个方法, 
+
+`unauthenticatedError` 是一个特殊(code=-1)的 error 方法.
 
 ```php
 class Controller extends BaseController
 {
-    // 引用 `Trait` 即可
     use ResponseTrait;
     
     public function demo1()
@@ -90,7 +91,7 @@ class Controller extends BaseController
     
     public function demo3()
     {
-       // success 方法 支持直接传入分页对象
+       // success 方法支持直接传入分页对象
        return $this->success(User::active()->paginate());
     }
     
@@ -113,7 +114,7 @@ class Controller extends BaseController
 
 ## API 资源
 
-支持 API 资源, `只需要`改下继承关系, 使用方法和原来一致, 直接返回即可. 
+支持 API 资源, `只需要`改下继承关系, 其他不需要任何改变.
 
 Tips: 更改下系统默认的 `stub`, 每次直接生成好继承关系.
 
