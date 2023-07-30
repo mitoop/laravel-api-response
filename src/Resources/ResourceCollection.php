@@ -2,7 +2,6 @@
 
 namespace Mitoop\Http\Resources;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection as Base;
 use Mitoop\Http\ResponseCode;
 
@@ -15,14 +14,18 @@ class ResourceCollection extends Base
         'message' => 'success',
     ];
 
-    public function preparePaginatedResponse($request): JsonResponse
+    public function paginationInformation($request, $paginated, $default): array
     {
-        if ($this->preserveAllQueryParameters) {
-            $this->resource->appends($request->query());
-        } elseif (! is_null($this->queryParameters)) {
-            $this->resource->appends($this->queryParameters);
+        $meta = [
+            'page' => $paginated['current_page'],
+            'page_size' => $paginated['per_page'],
+            'has_more' => $this->resource->hasMorePages(),
+        ];
+
+        if (method_exists($this->resource, 'total')) {
+            $meta['total'] = (int) $this->resource->total();
         }
 
-        return (new PaginatedResourceResponse($this))->toResponse($request);
+        return compact('meta');
     }
 }

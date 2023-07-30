@@ -2,10 +2,8 @@
 
 namespace Mitoop\Http;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\Response;
 
 trait ResponseTrait
@@ -13,12 +11,7 @@ trait ResponseTrait
     protected function success($data = null, $message = 'success'): JsonResponse
     {
         if ($data instanceof Paginator) {
-            return $this->pagingSuccess(...func_get_args());
-        }
-
-        if (is_string($data) && 1 === count(func_get_args())) {
-            $message = $data;
-            $data = null;
+            return $this->pagingSuccess($data, $message);
         }
 
         return $this->sendResponse($data, $message, ResponseCode::SUCCESS);
@@ -34,25 +27,19 @@ trait ResponseTrait
         return $this->error(message: $message, code: ResponseCode::UNAUTHENTICATED);
     }
 
-    protected function pagingSuccess(Paginator $paginator, $meta = [], $message = 'success'): JsonResponse
+    private function pagingSuccess(Paginator $paginator, $message): JsonResponse
     {
-        /* @var AbstractPaginator $paginator */
-        $data = $paginator->getCollection();
-
-        $currentPage = $paginator->currentPage();
-        $pageMeta = [
-            'page' => $currentPage,
+        $meta = [
+            'page' => $paginator->currentPage(),
             'page_size' => $paginator->perPage(),
             'has_more' => $paginator->hasMorePages(),
         ];
 
-        if (is_a($paginator, LengthAwarePaginator::class)) {
-            $pageMeta['total'] = (int) $paginator->total();
+        if (method_exists($paginator, 'total')) {
+            $meta['total'] = (int) $paginator->total();
         }
 
-        $meta = array_merge($meta, $pageMeta);
-
-        return $this->sendResponse($data, $message, ResponseCode::SUCCESS, $meta);
+        return $this->sendResponse($paginator->getCollection(), $message, ResponseCode::SUCCESS, $meta);
     }
 
     private function sendResponse($data, $message, $code, $meta = null): JsonResponse

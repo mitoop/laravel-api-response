@@ -16,8 +16,9 @@ class Resource extends JsonResource
 
     protected static function newCollection($resource)
     {
-        return tap(new AnonymousResourceCollection($resource, static::class), function ($collection) {
-            $collection->with = (new self([]))->with;
+        return tap(new ResourceCollection($resource), function ($collection) {
+            $collection->collects = static::class;
+            $collection->with = (new static([]))->with;
         });
     }
 }
