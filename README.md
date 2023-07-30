@@ -17,11 +17,12 @@ composer require mitoop/laravel-api-response
 #### 普通格式
 ```json
 {
-  "code": 0, // 成功为0 失败为1 Token失效为-1
-  "message": "success", // 提示信息
-  "data": null // 内容
+  "code": 0,
+  "message": "success",
+  "data": null
 }
 ```
+
 #### 分页格式
 ```json
 {
@@ -36,13 +37,24 @@ composer require mitoop/laravel-api-response
       "status": true
     }
   ],
-  "meta": { // 分页多了 `meta` 属性
-    "page": 1, // 当前分页
-    "page_size": 20, // 分页大小
-    "has_more": false, // 是否还有下一页
-    "total": 1 // 总数 `paginate` 方法有 total 属性, `simplePaginate` 方法没有
+  "meta": {
+    "page": 1, 
+    "page_size": 20, 
+    "has_more": false,
+    "total": 1 
   }
 }
+```
+
+```text
+code: 状态码 成功为0/失败为1/Token失效为-1, 前端可以作为逻辑判断依据
+message: 提示信息
+data: 内容主体
+meta: 分页信息
+meta.page: 当前分页
+meta.page_size: 分页大小
+meta.has_more: 是否还有下一页
+meta.total: 总数 `paginate` 方法有 total 属性, `simplePaginate` 方法没有
 ```
 
 ## 使用
