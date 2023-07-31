@@ -18,7 +18,6 @@ class Resource extends JsonResource
     {
         return tap(new ResourceCollection($resource), function ($collection) {
             $collection->collects = static::class;
-            $collection->with = (new static([]))->with;
         });
     }
 }
