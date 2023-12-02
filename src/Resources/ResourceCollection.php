@@ -3,16 +3,10 @@
 namespace Mitoop\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection as Base;
-use Mitoop\Http\ResponseCode;
 
 class ResourceCollection extends Base
 {
     use ResourceTrait;
-
-    public $with = [
-        'code' => ResponseCode::SUCCESS,
-        'message' => 'success',
-    ];
 
     public function paginationInformation($request, $paginated, $default): array
     {

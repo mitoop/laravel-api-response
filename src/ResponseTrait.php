@@ -14,17 +14,17 @@ trait ResponseTrait
             return $this->pagingSuccess($data, $message);
         }
 
-        return $this->sendResponse($data, $message, ResponseCode::SUCCESS);
+        return $this->sendResponse($data, $message, ResponseCode::$success);
     }
 
-    protected function error($message = 'error', $data = null, $code = ResponseCode::ERROR): JsonResponse
+    protected function error($message = 'error', $data = null): JsonResponse
     {
-        return $this->sendResponse($data, $message, $code);
+        return $this->sendResponse($data, $message, ResponseCode::$error);
     }
 
-    protected function unauthenticatedError($message = '登录信息已过期, 请重新登录！'): JsonResponse
+    protected function unauthenticated($message = 'Unauthenticated.', $data = null): JsonResponse
     {
-        return $this->error(message: $message, code: ResponseCode::UNAUTHENTICATED);
+        return $this->sendResponse($data, $message, ResponseCode::$unauthenticated);
     }
 
     private function pagingSuccess(Paginator $paginator, $message): JsonResponse
@@ -39,7 +39,7 @@ trait ResponseTrait
             $meta['total'] = (int) $paginator->total();
         }
 
-        return $this->sendResponse($paginator->getCollection(), $message, ResponseCode::SUCCESS, $meta);
+        return $this->sendResponse($paginator->getCollection(), $message, ResponseCode::$success, $meta);
     }
 
     private function sendResponse($data, $message, $code, $meta = null): JsonResponse

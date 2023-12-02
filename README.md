@@ -2,6 +2,11 @@
 
 <p align="center">🍎 定制统一的输出格式</p>
 
+
+```shell
+echo $a;
+
+```
 ## 环境需求
 
 - PHP >= 8.1
@@ -38,10 +43,10 @@ composer require mitoop/laravel-api-response
     }
   ],
   "meta": {
-    "page": 1, 
-    "page_size": 20, 
+    "page": 1,
+    "page_size": 20,
     "has_more": false,
-    "total": 1 
+    "total": 1
   }
 }
 ```
@@ -70,7 +75,7 @@ class Controller extends BaseController
 
 #### 可用方法
 
-包含方法 `success`, `error`, `unauthenticatedError` 三个方法, 
+包含方法 `success`, `error`, `unauthenticatedError` 三个方法,
 
 `unauthenticatedError` 是一个特殊(code=-1)的 error 方法.
 
@@ -78,33 +83,33 @@ class Controller extends BaseController
 class Controller extends BaseController
 {
     use ResponseTrait;
-    
+
     public function demo1()
     {
        return $this->success();
     }
-    
+
     public function demo2()
     {
        return $this->success(['Hello']);
     }
-    
+
     public function demo3()
     {
        // success 方法支持直接传入分页对象
        return $this->success(User::active()->paginate());
     }
-    
+
     public function demo4()
     {
        return $this->error();
     }
-    
+
     public function demo5()
     {
        return $this->error('自定义错误信息');
     }
-    
+
     public function demo5()
     {
        return $this->unauthenticatedError('登录信息已失效, 请重新登陆!');
@@ -146,14 +151,14 @@ use Mitoop\Http\Resources\ResourceCollection;
 
 class LoraCollection extends ResourceCollection
 {
-  
+
 }
 ```
 
 #### 和原来一样直接返回
 ```php
 class Controller extends BaseController
-{    
+{
     public function demo1()
     {
        return new LoraResource(Lora::find(1));
