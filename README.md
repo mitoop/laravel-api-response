@@ -47,7 +47,7 @@ composer require mitoop/laravel-api-response
 ```
 
 ```text
-code: 状态码 成功为0/失败为1/Token失效为-1, 前端可以作为逻辑判断依据
+code: 状态码 默认成功为0, 失败为1, 登录失效为-1, 可以通过 `setDefault` 方法修改
 message: 提示信息
 data: 内容主体
 meta: 分页信息
@@ -63,16 +63,13 @@ use Mitoop\Http\ResponseTrait;
 
 class Controller extends BaseController
 {
-    // 引用 `Trait` 即可
     use ResponseTrait;
 }
 ```
 
 #### 可用方法
 
-包含方法 `success`, `error`, `unauthenticatedError` 三个方法,
-
-`unauthenticatedError` 是一个特殊(code=-1)的 error 方法.
+包含方法 `success`, `error`, `unauthenticated` 三个方法, 分别对应成功, 失败, 登录失效三种情况.
 
 ```php
 class Controller extends BaseController
@@ -91,7 +88,6 @@ class Controller extends BaseController
 
     public function demo3()
     {
-       // success 方法支持直接传入分页对象
        return $this->success(User::active()->paginate());
     }
 
@@ -105,11 +101,24 @@ class Controller extends BaseController
        return $this->error('自定义错误信息');
     }
 
-    public function demo5()
+    public function demo6()
     {
-       return $this->unauthenticatedError('登录信息已失效, 请重新登陆!');
+       return $this->unauthenticated('登录信息已失效, 请重新登陆!');
     }
 }
+```
+
+## 自定义状态码
+通过 `ResponseCode::setDefault` 方法修改默认状态码
+
+```php
+use Mitoop\Http\ResponseCode;
+
+ResponseCode::setDefault([
+    'success' => 200,
+    'error' => 500,
+    'unauthenticated' => 0,
+]);
 ```
 
 ## API 资源
@@ -179,16 +188,12 @@ class Handler extends ExceptionHandler
                 return $this->error('未找到对应数据');
             }
 
-            if ($e instanceof AccessDeniedHttpException) {
-                return $this->error('您没有该权限');
-            }
-
             if ($e instanceof AuthenticationException) {
-                return $this->unauthenticatedError();
+                return $this->unauthenticated();
             }
 
             if ($e instanceof JWTException) {
-                return $this->unauthenticatedError();
+                return $this->unauthenticated();
             }
 
             if ($e instanceof ValidationException) {
