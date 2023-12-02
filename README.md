@@ -2,11 +2,6 @@
 
 <p align="center">🍎 定制统一的输出格式</p>
 
-
-```shell
-echo $a;
-
-```
 ## 环境需求
 
 - PHP >= 8.1
