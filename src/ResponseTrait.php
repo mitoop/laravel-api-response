@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Response;
 
 trait ResponseTrait
 {
-    protected function success($data = null, $message = 'success'): JsonResponse
+    public function success($data = null, $message = 'success'): JsonResponse
     {
         if ($data instanceof Paginator) {
             return $this->pagingSuccess($data, $message);
@@ -17,12 +17,12 @@ trait ResponseTrait
         return $this->sendResponse($data, $message, ResponseCode::$success);
     }
 
-    protected function error($message = 'error', $data = null): JsonResponse
+    public function error($message = 'error', $data = null): JsonResponse
     {
         return $this->sendResponse($data, $message, ResponseCode::$error);
     }
 
-    protected function unauthenticated($message = 'Unauthenticated.', $data = null): JsonResponse
+    public function unauthenticated($message = 'Unauthenticated.', $data = null): JsonResponse
     {
         return $this->sendResponse($data, $message, ResponseCode::$unauthenticated);
     }
