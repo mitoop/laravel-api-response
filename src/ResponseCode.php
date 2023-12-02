@@ -10,8 +10,6 @@ class ResponseCode
 
     public static int $unauthenticated = -1;
 
-    public static string $unauthenticatedMsg = 'Unauthenticated.';
-
     public static function setDefault(array $data): void
     {
         if (isset($data['success'])) {
@@ -24,10 +22,6 @@ class ResponseCode
 
         if (isset($data['unauthenticated'])) {
             self::$unauthenticated = (int) $data['unauthenticated'];
-        }
-
-        if (isset($data['unauthenticated_msg'])) {
-            self::$unauthenticatedMsg = (string) $data['unauthenticated_msg'];
         }
     }
 }
