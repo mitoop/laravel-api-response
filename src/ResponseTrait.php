@@ -54,6 +54,6 @@ trait ResponseTrait
             $data['meta'] = $meta;
         }
 
-        return Response::json(data: $data, options: JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES);
+        return Response::json(data: $data, options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }
