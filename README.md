@@ -175,53 +175,11 @@ class Controller extends BaseController
 通过 `renderable` 方法统一处理异常输出格式.
 
 ```php
-namespace App\Exceptions;
-
-class Handler extends ExceptionHandler
-{
-    use ResponseTrait;
-
-    public function register(): void
-    {
-        $this->renderable(function (Throwable $e, Request $request) {
-            if ($e instanceof NotFoundHttpException) {
-                return $this->error('未找到对应数据');
-            }
-
-            if ($e instanceof AuthenticationException) {
-                return $this->unauthenticated();
-            }
-
-            if ($e instanceof JWTException) {
-                return $this->unauthenticated();
-            }
-
-            if ($e instanceof ValidationException) {
-                return $this->error(Arr::first(Arr::flatten($e->errors())), $e->errors());
-            }
-
-            $message = config('app.debug') ? $e->getMessage() : '服务器发生了未知的异常，请稍后再试';
-            $data = config('app.debug') ? format_exception($e, [
-                'url' => sprintf('[%s] %s', request()->method(), request()->url()),
-                'trace' => collect($e->getTrace())->map(function ($trace) {
-                    $trace = Arr::except($trace, ['args']);
-
-                    if (isset($trace['file'])) {
-                        $trace['file'] = str_replace(base_path(), '', $trace['file']);
-                    }
-
-                    return $trace;
-                })->all(),
-            ]) : null;
-
-            if (empty($message)) {
-                $message = '服务器发生了未知的异常，请稍后再试';
-            }
-
-            return $this->error($message, $data);
-        });
-    }
-}
+->withExceptions(function (Exceptions $exceptions) {
+    $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+        return (new Mitoop\Http\Response())->error('未找到对应数据');
+    });
+})
 ```
 
 
