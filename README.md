@@ -172,7 +172,7 @@ class Controller extends BaseController
 
 ## 异常
 
-通过 `renderable` 方法统一处理异常输出格式.
+通过 `render` 方法统一处理异常输出格式.
 
 ```php
 ->withExceptions(function (Exceptions $exceptions) {
