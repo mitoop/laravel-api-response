@@ -47,7 +47,7 @@ composer require mitoop/laravel-api-response
 ```
 
 ```text
-code: 状态码 默认成功为0, 失败为1, 登录失效为-1, 可以通过 `setDefault` 方法修改
+code: 状态码 默认成功为0, 失败为1, 登录失效为-1, 可以通过 `setDefaults` 方法修改
 message: 提示信息
 data: 内容主体
 meta: 分页信息
@@ -59,65 +59,68 @@ meta.total: 总数 `paginate` 方法有 total 属性, `simplePaginate` 方法没
 
 ## 使用
 ```php
-use Mitoop\Http\ResponseTrait;
+use Mitoop\Http\JsonResponder;
 
 class Controller extends BaseController
 {
-    use ResponseTrait;
+    use JsonResponder;
 }
 ```
 
 #### 可用方法
 
-包含方法 `success`, `error`, `unauthenticated` 三个方法, 分别对应成功, 失败, 登录失效三种情况.
+包含方法 `success`, `error`, `reject` 三个方法, 分别对应成功, 失败, 登录失效三种情况.
 
 ```php
 class Controller extends BaseController
 {
-    use ResponseTrait;
+    use JsonResponder;
 
-    public function demo1()
+    public function one()
     {
        return $this->success();
     }
 
-    public function demo2()
+    public function two()
     {
        return $this->success(['Hello']);
     }
 
-    public function demo3()
+    public function three()
     {
        return $this->success(User::active()->paginate());
     }
 
-    public function demo4()
+    public function four()
     {
        return $this->error();
     }
 
-    public function demo5()
+    public function five()
     {
        return $this->error('自定义错误信息');
     }
 
-    public function demo6()
+    public function six()
     {
-       return $this->unauthenticated('登录信息已失效, 请重新登陆!');
+       return $this->reject('登录信息已失效, 请重新登陆!');
     }
 }
 ```
 
-## 自定义状态码
-通过 `ResponseCode::setDefault` 方法修改默认状态码
+## 自定义状态码以及扩展字段
+在 `AppServiceProvider@boot` 方法中添加如下代码
 
 ```php
-use Mitoop\Http\ResponseCode;
+use Mitoop\Http\Config;
 
-ResponseCode::setDefault([
-    'success' => 200,
-    'error' => 500,
-    'unauthenticated' => 0,
+app(Config::class)->setDefaults([
+    'success' => 0,
+    'error' => 1,
+    'reject' => -1,
+    'extra' => [
+       'request_id' => app('request_id'),
+    ],
 ]);
 ```
 
@@ -163,7 +166,7 @@ class LoraCollection extends ResourceCollection
 ```php
 class Controller extends BaseController
 {
-    public function demo1()
+    public function show()
     {
        return new LoraResource(Lora::find(1));
     }
@@ -177,7 +180,7 @@ class Controller extends BaseController
 ```php
 ->withExceptions(function (Exceptions $exceptions) {
     $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-        return (new Mitoop\Http\Response())->error('未找到对应数据');
+        return app(Responder::class)->error('未找到对应数据');
     });
 })
 ```

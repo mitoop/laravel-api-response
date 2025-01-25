@@ -18,5 +18,14 @@
     "psr-4": {
       "Mitoop\\Http\\": "src/"
     }
+  },
+  "extra": {
+    "component": "package",
+    "frameworks": ["Laravel"],
+    "laravel": {
+      "providers": [
+        "Mitoop\\Http\\ServiceProvider"
+      ]
+    }
   }
 }

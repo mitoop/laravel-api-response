@@ -3,7 +3,7 @@
 namespace Mitoop\Http\Resources;
 
 use Illuminate\Http\Request;
-use Mitoop\Http\ResponseCode;
+use Mitoop\Http\Config;
 
 trait ResourceTrait
 {
@@ -19,11 +19,18 @@ trait ResourceTrait
         return JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES;
     }
 
-    public function with(Request $request)
+    public function with(Request $request): array
     {
-        return [
-            'code' => ResponseCode::$success,
-            'message' => 'success',
+        $data = [
+            'code' => app(Config::class)->success(),
+            'message' => 'ok',
         ];
+
+        $extra = app(Config::class)->extra();
+        if (! empty($extra)) {
+            $data = array_merge($data, $extra);
+        }
+
+        return $data;
     }
 }
