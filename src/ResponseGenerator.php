@@ -26,7 +26,7 @@ class ResponseGenerator
 
         $payload = $this->preparePayload($data, $message, $code, $meta);
 
-        return Response::json($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return Response::json($payload, options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     protected function getPaginationMeta(Paginator $paginator): array
