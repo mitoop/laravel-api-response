@@ -10,9 +10,9 @@
   ],
   "require": {
     "php": "^8.2",
-    "illuminate/pagination": "^11",
-    "illuminate/http": "^11",
-    "illuminate/support": "^11"
+    "illuminate/pagination": "^11|^12",
+    "illuminate/http": "^11|^12",
+    "illuminate/support": "^11|^12"
   },
   "autoload": {
     "psr-4": {
