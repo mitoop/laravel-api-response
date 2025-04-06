@@ -3,7 +3,7 @@
 namespace Mitoop\Http;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\Response;
 
 class ResponseGenerator
@@ -19,7 +19,7 @@ class ResponseGenerator
     {
         $meta = [];
 
-        if ($data instanceof Paginator) {
+        if ($data instanceof AbstractPaginator) {
             $meta = $this->getPaginationMeta($data);
             $data = $data->getCollection();
         }
@@ -29,7 +29,7 @@ class ResponseGenerator
         return Response::json($payload, options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    protected function getPaginationMeta(Paginator $paginator): array
+    protected function getPaginationMeta(AbstractPaginator $paginator): array
     {
         $meta = [
             'page' => $paginator->currentPage(),
