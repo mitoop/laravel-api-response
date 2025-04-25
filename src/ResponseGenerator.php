@@ -2,8 +2,9 @@
 
 namespace Mitoop\Http;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\Response;
 
 class ResponseGenerator
@@ -19,9 +20,16 @@ class ResponseGenerator
     {
         $meta = [];
 
-        if ($data instanceof AbstractPaginator) {
+        if ($data instanceof Paginator) {
             $meta = $this->getPaginationMeta($data);
             $data = $data->getCollection();
+        } elseif ($data instanceof CursorPaginator) {
+            $meta = [
+                'next_cursor' => $data->nextCursor()?->encode(),
+                'page_size' => $data->perPage(),
+                'has_more' => $data->hasMorePages(),
+            ];
+            $data = $data->items();
         }
 
         $payload = $this->preparePayload($data, $message, $code, $meta);
@@ -29,7 +37,7 @@ class ResponseGenerator
         return Response::json($payload, options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    protected function getPaginationMeta(AbstractPaginator $paginator): array
+    protected function getPaginationMeta(Paginator $paginator): array
     {
         $meta = [
             'page' => $paginator->currentPage(),
