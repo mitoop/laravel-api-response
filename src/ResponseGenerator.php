@@ -22,6 +22,7 @@ class ResponseGenerator
 
         if ($data instanceof Paginator) {
             $meta = [
+                'pagination' => 'page',
                 'page' => $data->currentPage(),
                 'page_size' => $data->perPage(),
                 'has_more' => $data->hasMorePages(),
@@ -33,6 +34,7 @@ class ResponseGenerator
             $data = $data->getCollection();
         } elseif ($data instanceof CursorPaginator) {
             $meta = [
+                'pagination' => 'cursor',
                 'next_cursor' => $data->nextCursor()?->encode(),
                 'page_size' => $data->perPage(),
                 'has_more' => $data->hasMorePages(),
