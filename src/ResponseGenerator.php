@@ -21,7 +21,15 @@ class ResponseGenerator
         $meta = [];
 
         if ($data instanceof Paginator) {
-            $meta = $this->getPaginationMeta($data);
+            $meta = [
+                'page' => $data->currentPage(),
+                'page_size' => $data->perPage(),
+                'has_more' => $data->hasMorePages(),
+            ];
+
+            if (method_exists($data, 'total')) {
+                $meta['total'] = (int) $data->total();
+            }
             $data = $data->getCollection();
         } elseif ($data instanceof CursorPaginator) {
             $meta = [
@@ -32,24 +40,10 @@ class ResponseGenerator
             $data = $data->items();
         }
 
-        $payload = $this->preparePayload($data, $message, $code, $meta);
-
-        return Response::json($payload, options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
-
-    protected function getPaginationMeta(Paginator $paginator): array
-    {
-        $meta = [
-            'page' => $paginator->currentPage(),
-            'page_size' => $paginator->perPage(),
-            'has_more' => $paginator->hasMorePages(),
-        ];
-
-        if (method_exists($paginator, 'total')) {
-            $meta['total'] = (int) $paginator->total();
-        }
-
-        return $meta;
+        return Response::json(
+            $this->preparePayload($data, $message, $code, $meta),
+            options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        );
     }
 
     protected function preparePayload($data, string $message, int $code, array $meta): array
