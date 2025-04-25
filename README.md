@@ -76,6 +76,8 @@ code: 状态码 默认成功为0, 失败为1, 登录失效为-1, 可以通过 `s
 message: 提示信息
 data: 内容主体
 meta: 分页信息
+meta.pagination: 分页类型
+meta.next_cursor: 下一个游标
 meta.page: 当前分页
 meta.page_size: 分页大小
 meta.has_more: 是否还有下一页
