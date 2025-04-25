@@ -1,6 +1,6 @@
 <h1 align="center">API Response Trait</h1>
 
-<p align="center">🍎 定制统一的输出格式</p>
+<p align="center">🔮 统一 Laravel 接口的返回格式，让数据结构更规范、更易于前后端协作。</p>
 
 ## 环境需求
 
@@ -23,7 +23,7 @@ composer require mitoop/laravel-api-response
 }
 ```
 
-#### 分页格式
+#### page 分页格式
 ```json
 {
   "code": 0,
@@ -38,10 +38,35 @@ composer require mitoop/laravel-api-response
     }
   ],
   "meta": {
+    "pagination": "page",
     "page": 1,
     "page_size": 20,
     "has_more": false,
     "total": 1
+  }
+}
+```
+
+#### cursor 分页格式
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": "019653b0-702f-7247-bce4-85444f5f539b",
+      "name": "昊嘉网络有限公司",
+      "balance": "980.80",
+      "status": 0,
+      "created_at": "2025-04-20 22:53:14",
+      "updated_at": "2025-04-20 22:53:14"
+    }
+  ],
+  "meta": {
+    "pagination": "cursor",
+    "next_cursor": "eyJtZXJjaGFudHMuaWQiOiIwMTk2NTNiMC03MWQ1LTcwYTYtYTIwNC0wZGQ1MjI3MjI1NjIiLCJfcG9pbnRzVG9OZXh0SXRlbXMiOnRydWV9",
+    "page_size": 1,
+    "has_more": true
   }
 }
 ```
