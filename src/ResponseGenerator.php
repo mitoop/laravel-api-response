@@ -6,15 +6,11 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
+use Mitoop\Http\Headers\HeaderResolverInterface;
 
 class ResponseGenerator
 {
-    protected Config $config;
-
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
+    public function __construct(protected HeaderResolverInterface $headerResolver, protected Config $config) {}
 
     public function generate($data, string $message, int $code): JsonResponse
     {
@@ -42,10 +38,11 @@ class ResponseGenerator
             $data = $data->items();
         }
 
-        return Response::json(
-            $this->preparePayload($data, $message, $code, $meta),
-            options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-        );
+        $payload = $this->preparePayload($data, $message, $code, $meta);
+        $jsonOptions = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+        $headers = $this->headerResolver->resolve($payload, $jsonOptions);
+
+        return Response::json($payload, headers: $headers, options: $jsonOptions);
     }
 
     protected function preparePayload($data, string $message, int $code, array $meta): array
