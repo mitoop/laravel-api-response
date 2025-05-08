@@ -96,7 +96,7 @@ class Controller extends BaseController
 
 #### 可用方法
 
-包含方法 `success`, `error`, `reject` 三个方法, 分别对应成功, 失败, 登录失效三种情况.
+包含三个方法 `success`, `error`, `reject`, 分别对应成功, 失败, 登录失效三种情况.
 
 ```php
 class Controller extends BaseController
