@@ -3,7 +3,7 @@
 namespace Mitoop\Http\Resources;
 
 use Illuminate\Http\Request;
-use Mitoop\Http\Config;
+use Mitoop\Http\JsonResponderDefault;
 use stdClass;
 
 trait ResourceTrait
@@ -23,12 +23,12 @@ trait ResourceTrait
     public function with(Request $request): array
     {
         $data = [
-            'code' => app(Config::class)->success(),
+            'code' => app(JsonResponderDefault::class)->success(),
             'message' => 'ok',
             'meta' => new stdClass,
         ];
 
-        $extra = app(Config::class)->extra();
+        $extra = app(JsonResponderDefault::class)->extra();
         if (! empty($extra)) {
             $data = array_merge($data, $extra);
         }

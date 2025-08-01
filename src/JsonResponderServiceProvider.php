@@ -9,7 +9,7 @@ use Mitoop\Http\Headers\NullHeaderResolver;
 class JsonResponderServiceProvider extends ServiceProvider
 {
     public array $singletons = [
-        Config::class => Config::class,
+        JsonResponderDefault::class => JsonResponderDefault::class,
         JsonResponder::class => JsonResponder::class,
         ResponseGenerator::class => ResponseGenerator::class,
         HeaderResolverInterface::class => NullHeaderResolver::class,

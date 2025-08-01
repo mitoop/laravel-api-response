@@ -10,7 +10,7 @@ use Mitoop\Http\Headers\HeaderResolverInterface;
 
 class ResponseGenerator
 {
-    public function __construct(protected HeaderResolverInterface $headerResolver, protected Config $config) {}
+    public function __construct(protected HeaderResolverInterface $headerResolver, protected JsonResponderDefault $config) {}
 
     public function generate($data, string $message, int $code): JsonResponse
     {

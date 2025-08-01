@@ -141,9 +141,9 @@ class Controller extends BaseController
 在 `AppServiceProvider@boot` 方法中添加如下代码
 
 ```php
-use Mitoop\Http\Config;
+use Mitoop\Http\JsonResponderDefault;
 
-app(Config::class)->setDefaults([
+app(JsonResponderDefault::class)->apply([
     'success' => 0,
     'error' => 1,
     'deny' => -1,

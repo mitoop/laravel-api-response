@@ -2,7 +2,7 @@
 
 namespace Mitoop\Http;
 
-class Config
+class JsonResponderDefault
 {
     protected array $extra = [];
 
@@ -20,7 +20,7 @@ class Config
      *     extra?: array
      * } $data
      */
-    public function setDefaults(array $data): void
+    public function apply(array $data): void
     {
         if (isset($data['success'])) {
             $this->success = (int) $data['success'];
