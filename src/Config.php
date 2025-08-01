@@ -10,13 +10,13 @@ class Config
 
     protected int $error = 1;
 
-    protected int $reject = -1;
+    protected int $deny = -1;
 
     /**
      * @param array{
      *     success?: int,
      *     error?: int,
-     *     reject?: int,
+     *     deny?: int,
      *     extra?: array
      * } $data
      */
@@ -30,8 +30,8 @@ class Config
             $this->error = (int) $data['error'];
         }
 
-        if (isset($data['reject'])) {
-            $this->reject = (int) $data['reject'];
+        if (isset($data['deny'])) {
+            $this->deny = (int) $data['deny'];
         }
 
         if (isset($data['extra']) && is_array($data['extra'])) {
@@ -54,8 +54,8 @@ class Config
         return $this->error;
     }
 
-    public function reject(): int
+    public function deny(): int
     {
-        return $this->reject;
+        return $this->deny;
     }
 }

@@ -4,6 +4,7 @@ namespace Mitoop\Http\Resources;
 
 use Illuminate\Http\Request;
 use Mitoop\Http\Config;
+use stdClass;
 
 trait ResourceTrait
 {
@@ -24,6 +25,7 @@ trait ResourceTrait
         $data = [
             'code' => app(Config::class)->success(),
             'message' => 'ok',
+            'meta' => new stdClass,
         ];
 
         $extra = app(Config::class)->extra();

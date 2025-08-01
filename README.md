@@ -19,7 +19,8 @@ composer require mitoop/laravel-api-response
 {
   "code": 0,
   "message": "success",
-  "data": null
+  "data": {},
+  "meta": {}
 }
 ```
 
@@ -85,18 +86,19 @@ meta.total: 总数 `paginate` 方法有 total 属性, `simplePaginate` 方法没
 ```
 
 ## 使用
+
 ```php
-use Mitoop\Http\JsonResponder;
+use Mitoop\Http\RespondsWithJson;
 
 class Controller extends BaseController
 {
-    use JsonResponder;
+    use RespondsWithJson;
 }
 ```
 
 #### 可用方法
 
-包含三个方法 `success`, `error`, `reject`, 分别对应成功, 失败, 登录失效三种情况.
+包含三个方法 `success`, `error`, `deny`, 分别对应成功, 失败, 登录失效三种情况.
 
 ```php
 class Controller extends BaseController
@@ -130,7 +132,7 @@ class Controller extends BaseController
 
     public function six()
     {
-       return $this->reject('登录信息已失效, 请重新登陆!');
+       return $this->deny('登录信息已失效, 请重新登陆!');
     }
 }
 ```
@@ -144,7 +146,7 @@ use Mitoop\Http\Config;
 app(Config::class)->setDefaults([
     'success' => 0,
     'error' => 1,
-    'reject' => -1,
+    'deny' => -1,
     'extra' => [
        'request_id' => app('request_id'),
     ],

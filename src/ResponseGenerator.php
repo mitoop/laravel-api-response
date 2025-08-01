@@ -25,13 +25,13 @@ class ResponseGenerator
             ];
 
             if (method_exists($data, 'total')) {
-                $meta['total'] = (int) $data->total();
+                $meta['total'] = $data->total();
             }
             $data = $data->getCollection();
         } elseif ($data instanceof CursorPaginator) {
             $meta = [
                 'pagination' => 'cursor',
-                'next_cursor' => $data->nextCursor()?->encode(),
+                'next_cursor' => (string) $data->nextCursor()?->encode(),
                 'page_size' => $data->perPage(),
                 'has_more' => $data->hasMorePages(),
             ];
@@ -51,11 +51,8 @@ class ResponseGenerator
             'code' => $code,
             'message' => $message,
             'data' => $data,
+            'meta' => (object) $meta,
         ];
-
-        if ($meta) {
-            $payload['meta'] = $meta;
-        }
 
         $extra = $this->config->extra();
         if (! empty($extra)) {

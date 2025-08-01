@@ -5,20 +5,22 @@ namespace Mitoop\Http;
 use Illuminate\Http\JsonResponse;
 use stdClass;
 
-trait JsonResponder
+class JsonResponder
 {
+    public function __construct(protected ResponseGenerator $generator, protected Config $config) {}
+
     public function success($data = new stdClass, $message = 'ok'): JsonResponse
     {
-        return app(Responder::class)->success($data, $message);
+        return $this->generator->generate($data, $message, $this->config->success());
     }
 
     public function error($message = 'error', ?int $code = null, $data = new stdClass): JsonResponse
     {
-        return app(Responder::class)->error($message, $code, $data);
+        return $this->generator->generate($data, $message, $code ?? $this->config->error());
     }
 
-    public function reject($message = 'failed', $data = new stdClass): JsonResponse
+    public function deny($message = 'failed', $data = new stdClass): JsonResponse
     {
-        return app(Responder::class)->reject($message, $data);
+        return $this->generator->generate($data, $message, $this->config->deny());
     }
 }
