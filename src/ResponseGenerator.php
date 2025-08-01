@@ -47,6 +47,10 @@ class ResponseGenerator
 
     protected function preparePayload($data, string $message, int $code, array $meta): array
     {
+        if (is_scalar($data)) {
+            $data = ['value' => $data];
+        }
+
         $payload = [
             'code' => $code,
             'message' => $message,
