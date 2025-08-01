@@ -7,6 +7,7 @@ use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
 use Mitoop\Http\Headers\HeaderResolverInterface;
+use stdClass;
 
 class ResponseGenerator
 {
@@ -47,8 +48,8 @@ class ResponseGenerator
 
     protected function preparePayload($data, string $message, int $code, array $meta): array
     {
-        if (is_scalar($data)) {
-            $data = ['value' => $data];
+        if (is_null($data)) {
+            $data = new stdClass;
         }
 
         $payload = [
