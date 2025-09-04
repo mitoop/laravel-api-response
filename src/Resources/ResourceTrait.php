@@ -17,7 +17,7 @@ trait ResourceTrait
 
     public function jsonOptions(): int
     {
-        return JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES;
+        return JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
     }
 
     public function with(Request $request): array
