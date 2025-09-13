@@ -28,11 +28,6 @@ trait ResourceTrait
             'meta' => new stdClass,
         ];
 
-        $extra = app(JsonResponderDefault::class)->extra();
-        if (! empty($extra)) {
-            $data = array_merge($data, $extra);
-        }
-
-        return $data;
+        return array_merge($data, app(JsonResponderDefault::class)->extra() ?: []);
     }
 }

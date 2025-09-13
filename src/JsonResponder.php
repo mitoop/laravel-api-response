@@ -11,16 +11,16 @@ class JsonResponder
 
     public function success($data = new stdClass, string $message = 'ok'): JsonResponse
     {
-        return $this->generator->generate($data, $message, $this->config->success());
+        return $this->generator->generateSuccess($data, $message, $this->config->success());
     }
 
-    public function error(string $message = 'error', ?int $code = null, $data = new stdClass): JsonResponse
+    public function error(string $message = 'error', ?int $code = null, $error = new stdClass): JsonResponse
     {
-        return $this->generator->generate($data, $message, $code ?? $this->config->error());
+        return $this->generator->generateError($message, $code ?? $this->config->error(), $error);
     }
 
-    public function deny(string $message = 'failed', $data = new stdClass): JsonResponse
+    public function deny(string $message = 'unauthorized', $error = new stdClass): JsonResponse
     {
-        return $this->generator->generate($data, $message, $this->config->deny());
+        return $this->generator->generateError($message, $this->config->deny(), $error);
     }
 }

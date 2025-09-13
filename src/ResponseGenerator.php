@@ -11,9 +11,28 @@ use stdClass;
 
 class ResponseGenerator
 {
-    public function __construct(protected HeaderResolverInterface $headerResolver, protected JsonResponderDefault $config) {}
+    public function __construct(
+        protected HeaderResolverInterface $headerResolver,
+        protected JsonResponderDefault $config
+    ) {}
 
-    public function generate($data, string $message, int $code): JsonResponse
+    public function generateSuccess($data, string $message, int $code): JsonResponse
+    {
+        [$data, $meta] = $this->resolvePagination($data);
+
+        return $this->toJson(
+            $this->prepareSuccessPayload($data, $message, $code, $meta)
+        );
+    }
+
+    public function generateError(string $message, int $code, mixed $error): JsonResponse
+    {
+        return $this->toJson(
+            $this->prepareErrorPayload($message, $code, $error)
+        );
+    }
+
+    protected function resolvePagination(mixed $data): array
     {
         $meta = [];
 
@@ -28,6 +47,7 @@ class ResponseGenerator
             if (method_exists($data, 'total')) {
                 $meta['total'] = $data->total();
             }
+
             $data = $data->getCollection();
         } elseif ($data instanceof CursorPaginator) {
             $meta = [
@@ -36,34 +56,45 @@ class ResponseGenerator
                 'page_size' => $data->perPage(),
                 'has_more' => $data->hasMorePages(),
             ];
+
             $data = $data->items();
         }
 
-        $payload = $this->preparePayload($data, $message, $code, $meta);
-        $jsonOptions = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        $headers = $this->headerResolver->resolve($payload, $jsonOptions);
-
-        return Response::json($payload, headers: $headers, options: $jsonOptions);
+        return [$data, $meta];
     }
 
-    protected function preparePayload($data, string $message, int $code, array $meta): array
+    protected function prepareSuccessPayload($data, string $message, int $code, array $meta): array
     {
-        if (is_null($data)) {
-            $data = new stdClass;
-        }
-
-        $payload = [
+        return $this->mergeExtra([
             'code' => $code,
             'message' => $message,
-            'data' => $data,
+            'data' => $data ?? new stdClass,
             'meta' => (object) $meta,
-        ];
+        ]);
+    }
 
-        $extra = $this->config->extra();
-        if (! empty($extra)) {
-            $payload = array_merge($payload, $extra);
-        }
+    protected function prepareErrorPayload(string $message, int $code, mixed $error): array
+    {
+        return $this->mergeExtra([
+            'code' => $code,
+            'message' => $message,
+            'error' => $error ?? new stdClass,
+        ]);
+    }
 
-        return $payload;
+    protected function mergeExtra(array $payload): array
+    {
+        return array_merge($payload, $this->config->extra() ?: []);
+    }
+
+    protected function toJson(array $payload): JsonResponse
+    {
+        $options = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+        return Response::json(
+            $payload,
+            headers: $this->headerResolver->resolve($payload, $options),
+            options: $options
+        );
     }
 }

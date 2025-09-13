@@ -7,18 +7,18 @@ use stdClass;
 
 trait RespondsWithJson
 {
-    public function success(array|object|null $data = new stdClass, string $message = 'ok'): JsonResponse
+    public function success(mixed $data = new stdClass, string $message = 'ok'): JsonResponse
     {
         return app(JsonResponder::class)->success($data, $message);
     }
 
-    public function error(string $message = 'error', ?int $code = null, array|object|null $data = new stdClass): JsonResponse
+    public function error(string $message = 'error', ?int $code = null, mixed $error = null): JsonResponse
     {
-        return app(JsonResponder::class)->error($message, $code, $data);
+        return app(JsonResponder::class)->error($message, $code, $error);
     }
 
-    public function deny(string $message = 'unauthorized', array|object|null $data = new stdClass): JsonResponse
+    public function deny(string $message = 'unauthorized', mixed $error = null): JsonResponse
     {
-        return app(JsonResponder::class)->deny($message, $data);
+        return app(JsonResponder::class)->deny($message, $error);
     }
 }
