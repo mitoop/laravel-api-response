@@ -14,7 +14,7 @@ composer require mitoop/laravel-api-response
 ```
 
 ## 输出格式
-```json
+```jsonc
 {
   "code": 0,                   // 状态码，默认成功0，失败1，登录失效-1
   "message": "success",        // 提示信息
