@@ -14,75 +14,35 @@ composer require mitoop/laravel-api-response
 ```
 
 ## 输出格式
-#### 普通格式
 ```json
 {
-  "code": 0,
-  "message": "success",
-  "data": {},
-  "meta": {}
-}
-```
-
-#### page 分页格式
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": [
-    {
-      "id": 1,
-      "nickname": "admin",
-      "email": "i@admin.com",
-      "last_login": "2023-07-29 12:49:16",
-      "status": true
-    }
-  ],
-  "meta": {
-    "pagination": "page",
-    "page": 1,
-    "page_size": 20,
-    "has_more": false,
-    "total": 1
-  }
-}
-```
-
-#### cursor 分页格式
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": [
-    {
-      "id": "019653b0-702f-7247-bce4-85444f5f539b",
-      "name": "昊嘉网络有限公司",
-      "balance": "980.80",
-      "status": 0,
-      "created_at": "2025-04-20 22:53:14",
-      "updated_at": "2025-04-20 22:53:14"
-    }
-  ],
-  "meta": {
-    "pagination": "cursor",
-    "next_cursor": "eyJtZXJjaGFudHMuaWQiOiIwMTk2NTNiMC03MWQ1LTcwYTYtYTIwNC0wZGQ1MjI3MjI1NjIiLCJfcG9pbnRzVG9OZXh0SXRlbXMiOnRydWV9",
-    "page_size": 1,
-    "has_more": true
-  }
+  "code": 0,                   // 状态码，默认成功0，失败1，登录失效-1
+  "message": "success",        // 提示信息
+  "data": {},                  // 主体内容（成功响应）
+  "meta": {                    // 分页信息（仅分页响应存在）
+    "pagination": "page",      // 分页类型: page 或 cursor
+    "page": 1,                 // 当前页码（page分页）
+    "page_size": 20,           // 每页条数
+    "has_more": false,         // 是否有下一页
+    "total": 100,              // 总条数（仅 paginate）
+    "next_cursor": "..."       // 下一个游标（仅 cursor 分页）
+  },
+  "error": {}                  // 错误信息对象（数组或对象），仅失败响应存在
 }
 ```
 
 ```text
-code: 状态码 默认成功为0, 失败为1, 登录失效为-1, 可以通过 `setDefaults` 方法修改
-message: 提示信息
-data: 内容主体
-meta: 分页信息
-meta.pagination: 分页类型
-meta.next_cursor: 下一个游标
-meta.page: 当前分页
-meta.page_size: 分页大小
-meta.has_more: 是否还有下一页
-meta.total: 总数 `paginate` 方法有 total 属性, `simplePaginate` 方法没有
+code       : 状态码，默认值为 0（成功）、1（失败）、-1（登录失效），可通过 `setDefaults` 修改
+message    : 提示信息
+data       : 成功响应的主体内容
+meta       : 分页信息（仅在分页响应时存在）
+  meta.pagination : 分页类型，可为 "page" 或 "cursor"
+  meta.page       : 当前页码（仅 page 分页）
+  meta.page_size  : 每页条数
+  meta.has_more   : 是否有下一页
+  meta.total      : 总条数（仅 paginate 方法有，simplePaginate 没有）
+  meta.next_cursor: 下一个游标（仅 cursor 分页）
+error      : 错误信息对象(数组)，默认为空对象 {}
 ```
 
 ## 使用
@@ -138,6 +98,7 @@ class Controller extends BaseController
 ```
 
 ## 自定义状态码以及扩展字段
+
 在 `AppServiceProvider@boot` 方法中添加如下代码
 
 ```php
@@ -160,6 +121,7 @@ app(JsonResponderDefault::class)->apply([
 Tips: 更改下系统默认的 `stub`, 每次直接生成好继承关系.
 
 #### 普通资源继承 `Mitoop\Http\Resources\Resource`
+
 ```php
 use Illuminate\Http\Request;
 use Mitoop\Http\Resources\Resource;
@@ -178,6 +140,7 @@ class LoraResource extends Resource
 ```
 
 #### 资源集合继承 `Mitoop\Http\Resources\ResourceCollection`
+
 ```php
 use Mitoop\Http\Resources\Resource;
 
@@ -192,6 +155,7 @@ class LoraCollection extends ResourceCollection
 ```
 
 #### 和原来一样直接返回
+
 ```php
 class Controller extends BaseController
 {
@@ -213,7 +177,6 @@ class Controller extends BaseController
     });
 })
 ```
-
 
 ## License
 
