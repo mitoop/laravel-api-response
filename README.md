@@ -19,7 +19,7 @@ composer require mitoop/laravel-api-response
   "code": 0,                   // 状态码，默认成功0，失败1，登录失效-1
   "message": "success",        // 提示信息
   "data": {},                  // 主体内容（成功响应）
-  "meta": {                    // 分页信息（仅分页响应存在）
+  "meta": {                    // 分页信息，普通响应返回 {}，分页响应返回分页详情
     "pagination": "page",      // 分页类型: page 或 cursor
     "page": 1,                 // 当前页码（page分页）
     "page_size": 20,           // 每页条数
@@ -35,7 +35,7 @@ composer require mitoop/laravel-api-response
 code       : 状态码，默认值为 0（成功）、1（失败）、-1（登录失效），可通过 `setDefaults` 修改
 message    : 提示信息
 data       : 成功响应的主体内容
-meta       : 分页信息（仅在分页响应时存在）
+meta       : 分页信息，普通响应返回 {}，分页响应返回分页详情
   meta.pagination : 分页类型，可为 "page" 或 "cursor"
   meta.page       : 当前页码（仅 page 分页）
   meta.page_size  : 每页条数
