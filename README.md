@@ -23,7 +23,7 @@ composer require mitoop/laravel-api-response
 {
   "code": 0,                   // 状态码，默认成功0，失败1，登录失效-1
   "message": "success",        // 提示信息
-  "data": {},                  // 主体内容（成功响应）
+  "data": {},                  // 主体内容
   "meta": {                    // 分页信息，普通响应返回 {}，分页响应返回分页详情
     "pagination": "page",      // 分页类型: page 或 cursor
     "page": 1,                 // 当前页码（page分页）
@@ -32,7 +32,7 @@ composer require mitoop/laravel-api-response
     "total": 100,              // 总条数（仅 paginate）
     "next_cursor": "..."       // 下一个游标（仅 cursor 分页）
   },
-  "error": {}                  // 错误信息对象（数组或对象），仅失败响应存在
+  "errors": {}                  // 错误信息对象（数组或对象）
 }
 ```
 
@@ -47,7 +47,7 @@ meta       : 分页信息，普通响应返回 {}，分页响应返回分页详�
   meta.has_more   : 是否有下一页
   meta.total      : 总条数（仅 paginate 方法有，simplePaginate 没有）
   meta.next_cursor: 下一个游标（仅 cursor 分页）
-error      : 错误信息对象(数组)，默认为空对象 {}
+errors      : 错误信息对象(数组)，默认为空对象 {}
 ```
 
 ## 使用
@@ -68,7 +68,7 @@ class Controller extends BaseController
 ```php
 class Controller extends BaseController
 {
-    use JsonResponder;
+    use RespondsWithJson;
 
     public function one()
     {
@@ -176,9 +176,11 @@ class Controller extends BaseController
 通过 `render` 方法统一处理异常输出格式.
 
 ```php
+use Mitoop\Http\JsonResponder;
+
 ->withExceptions(function (Exceptions $exceptions) {
     $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-        return app(Responder::class)->error('未找到对应数据');
+        return app(JsonResponder::class)->error('未找到对应数据');
     });
 })
 ```
