@@ -25,10 +25,10 @@ class ResponseGenerator
         );
     }
 
-    public function generateError(string $message, int $code, mixed $error): JsonResponse
+    public function generateError(string $message, int $code, mixed $errors): JsonResponse
     {
         return $this->toJson(
-            $this->prepareErrorPayload($message, $code, $error)
+            $this->prepareErrorPayload($message, $code, $errors)
         );
     }
 
@@ -70,15 +70,18 @@ class ResponseGenerator
             'message' => $message,
             'data' => $data ?? new stdClass,
             'meta' => (object) $meta,
+            'errors' => new stdClass,
         ]);
     }
 
-    protected function prepareErrorPayload(string $message, int $code, mixed $error): array
+    protected function prepareErrorPayload(string $message, int $code, mixed $errors): array
     {
         return $this->mergeExtra([
             'code' => $code,
             'message' => $message,
-            'error' => $error ?? new stdClass,
+            'data' => new stdClass,
+            'meta' => new stdClass,
+            'errors' => $errors,
         ]);
     }
 

@@ -26,6 +26,7 @@ trait ResourceTrait
             'code' => app(JsonResponderDefault::class)->success(),
             'message' => 'ok',
             'meta' => new stdClass,
+            'errors' => new stdClass,
         ];
 
         return array_merge($data, app(JsonResponderDefault::class)->extra() ?: []);

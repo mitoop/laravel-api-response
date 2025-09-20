@@ -12,13 +12,13 @@ trait RespondsWithJson
         return app(JsonResponder::class)->success($data, $message);
     }
 
-    public function error(string $message = 'error', ?int $code = null, mixed $error = null): JsonResponse
+    public function error(string $message = 'error', ?int $code = null, mixed $errors = new stdClass): JsonResponse
     {
-        return app(JsonResponder::class)->error($message, $code, $error);
+        return app(JsonResponder::class)->error($message, $code, $errors);
     }
 
-    public function deny(string $message = 'unauthorized', mixed $error = null): JsonResponse
+    public function deny(string $message = 'unauthorized', mixed $errors = new stdClass): JsonResponse
     {
-        return app(JsonResponder::class)->deny($message, $error);
+        return app(JsonResponder::class)->deny($message, $errors);
     }
 }
