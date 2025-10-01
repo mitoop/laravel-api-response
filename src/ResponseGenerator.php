@@ -65,13 +65,17 @@ class ResponseGenerator
 
     protected function prepareSuccessPayload($data, string $message, int $code, array $meta): array
     {
-        return $this->mergeExtra([
+        $payload = [
             'code' => $code,
             'message' => $message,
             'data' => $data ?? new stdClass,
-            'meta' => (object) $meta,
-            'errors' => new stdClass,
-        ]);
+        ];
+
+        if (! empty($meta)) {
+            $payload['meta'] = $meta;
+        }
+
+        return $this->mergeExtra($payload);
     }
 
     protected function prepareErrorPayload(string $message, int $code, mixed $errors): array
@@ -80,8 +84,7 @@ class ResponseGenerator
             'code' => $code,
             'message' => $message,
             'data' => new stdClass,
-            'meta' => new stdClass,
-            'errors' => $errors,
+            'errors' => $errors ?? new stdClass,
         ]);
     }
 
