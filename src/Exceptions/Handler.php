@@ -3,11 +3,11 @@
 namespace Mitoop\Http\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Contracts\Debug\ExceptionHandler as IlluminateExceptionHandler;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Database\RecordNotFoundException;
 use Illuminate\Database\RecordsNotFoundException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -18,27 +18,42 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class ExceptionHandler
+class Handler extends ExceptionHandler
 {
-    public function __construct(protected IlluminateExceptionHandler $handler, protected JsonResponder $responder) {}
+    protected JsonResponder $responder;
 
-    public function map(array $mappings): void
+    public function register()
     {
-        $defaults = [
-            ModelNotFoundException::class => fn ($e) => new NotFoundHttpException('Model not found', $e),
-            RecordNotFoundException::class => fn ($e) => new NotFoundHttpException('Record not found', $e),
-            RecordsNotFoundException::class => fn ($e) => new NotFoundHttpException('Records not found', $e),
-            MultipleRecordsFoundException::class => fn ($e) => new ClientSafeException($e->getMessage(), $e),
-        ];
+        $this->responder = $this->container->make(JsonResponder::class);
 
-        $mappings = array_merge($defaults, $mappings);
-
-        foreach ($mappings as $from => $to) {
-            $this->handler->map($from, $to);
-        }
+        $this->renderable(function (Throwable $e, Request $request) {
+            return $this->renderExceptionWithJsonResponder($e, $request);
+        });
     }
 
-    public function render(Throwable $e, Request $request): JsonResponse
+    public function map($from, $to = null)
+    {
+        if (is_array($from)) {
+            $defaults = [
+                ModelNotFoundException::class => fn ($e) => new NotFoundHttpException('Model not found', $e),
+                RecordNotFoundException::class => fn ($e) => new NotFoundHttpException('Record not found', $e),
+                RecordsNotFoundException::class => fn ($e) => new NotFoundHttpException('Records not found', $e),
+                MultipleRecordsFoundException::class => fn ($e) => new ClientSafeException($e->getMessage(), $e),
+            ];
+
+            $from = array_merge($defaults, $from);
+
+            foreach ($from as $key => $value) {
+                parent::map($key, $value);
+            }
+
+            return $this;
+        }
+
+        return parent::map($from, $to);
+    }
+
+    protected function renderExceptionWithJsonResponder(Throwable $e, Request $request): JsonResponse
     {
         if ($e instanceof ClientSafeException) {
             return $this->responder->error($e->getMessage(), $e->getErrorCode());
@@ -57,7 +72,7 @@ class ExceptionHandler
         }
 
         $errors = new stdClass;
-        if (app()->environment('local')) {
+        if (config('app.debug')) {
             $errors = [
                 'class' => get_class($e),
                 'code' => $e->getCode(),

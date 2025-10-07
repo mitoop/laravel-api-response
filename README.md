@@ -176,20 +176,19 @@ class Controller extends BaseController
 通过 `JsonExceptionRenderer` 统一处理异常输出格式.
 
 ```php
-use Mitoop\Http\Exceptions\ExceptionHandler;
+use Illuminate\Foundation\Configuration\Exceptions;
 
 ->withExceptions(function (Exceptions $exceptions) {
-    $exceptions->renderable(function (Throwable $e, $request) {
-        $exceptions->dontReport([
-            ClientSafeException::class,
-        ]);
-
-        app(ExceptionHandler::class)->map([
-            JWTException::class => fn ($e) => new AuthenticationException
-        ]);
-        
-        return app(ExceptionHandler::class)->render($e, $request);
-    });
+    $exceptions->dontReport([
+        ClientSafeException::class,
+    ]);
+    
+    // 特殊异常映射
+    $exceptions->map([
+        JWTException::class => fn ($e) => new AuthenticationException
+    ]);
+    
+    // 其他异常将由统一的 Handler 接管，不需要单独处理
 })
 ```
 
