@@ -185,11 +185,10 @@ use Mitoop\Http\JsonResponder;
             ClientSafeException::class,
         ]);
 
-        $exceptions->map(JWTException::class, AuthenticationException::class);
-        $exceptions->map(ModelNotFoundException::class, function ($e) {
-            return new NotFoundHttpException('Resource not found', $e);
-        });
+        $exceptions->map(JWTException::class, fn ($e) => new AuthenticationException);
+        $exceptions->map(ModelNotFoundException::class, fn ($e) => new NotFoundHttpException('Resource not found', $e));
         // ...
+        
         return app(JsonExceptionRenderer::class)->render($e, $request);
     });
 })
