@@ -184,6 +184,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
     ]);
     
     // 特殊异常映射
+    /** @noinspection PhpParamsInspection */
     $exceptions->map([
         JWTException::class => fn ($e) => new AuthenticationException
     ]);
