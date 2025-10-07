@@ -176,8 +176,7 @@ class Controller extends BaseController
 通过 `JsonExceptionRenderer` 统一处理异常输出格式.
 
 ```php
-use Mitoop\Http\JsonExceptionRenderer;
-use Mitoop\Http\JsonResponder;
+use Mitoop\Http\Exceptions\ExceptionHandler;
 
 ->withExceptions(function (Exceptions $exceptions) {
     $exceptions->renderable(function (Throwable $e, $request) {
@@ -185,11 +184,11 @@ use Mitoop\Http\JsonResponder;
             ClientSafeException::class,
         ]);
 
-        $exceptions->map(JWTException::class, fn ($e) => new AuthenticationException);
-        $exceptions->map(ModelNotFoundException::class, fn ($e) => new NotFoundHttpException('Resource not found', $e));
-        // ...
+        app(ExceptionHandler::class)->map([
+            JWTException::class => fn ($e) => new AuthenticationException
+        ]);
         
-        return app(JsonExceptionRenderer::class)->render($e, $request);
+        return app(ExceptionHandler::class)->render($e, $request);
     });
 })
 ```

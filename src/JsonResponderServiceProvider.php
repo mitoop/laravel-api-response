@@ -3,6 +3,7 @@
 namespace Mitoop\Http;
 
 use Illuminate\Support\ServiceProvider;
+use Mitoop\Http\Exceptions\ExceptionHandler;
 use Mitoop\Http\Headers\HeaderResolverInterface;
 use Mitoop\Http\Headers\NullHeaderResolver;
 
@@ -13,6 +14,6 @@ class JsonResponderServiceProvider extends ServiceProvider
         JsonResponder::class => JsonResponder::class,
         ResponseGenerator::class => ResponseGenerator::class,
         HeaderResolverInterface::class => NullHeaderResolver::class,
-        JsonExceptionRenderer::class => JsonExceptionRenderer::class,
+        ExceptionHandler::class => ExceptionHandler::class,
     ];
 }
