@@ -3,11 +3,11 @@
 namespace Mitoop\Http\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Debug\ExceptionHandler as IlluminateExceptionHandler;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Database\RecordNotFoundException;
 use Illuminate\Database\RecordsNotFoundException;
-use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -20,7 +20,7 @@ use Throwable;
 
 class ExceptionHandler
 {
-    public function __construct(protected Exceptions $exceptions, protected JsonResponder $responder) {}
+    public function __construct(protected IlluminateExceptionHandler $handler, protected JsonResponder $responder) {}
 
     public function map(array $mappings): void
     {
@@ -34,7 +34,7 @@ class ExceptionHandler
         $mappings = array_merge($defaults, $mappings);
 
         foreach ($mappings as $from => $to) {
-            $this->exceptions->map($from, $to);
+            $this->handler->map($from, $to);
         }
     }
 
