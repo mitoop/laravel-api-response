@@ -173,14 +173,24 @@ class Controller extends BaseController
 
 ## 异常
 
-通过 `render` 方法统一处理异常输出格式.
+通过 `JsonExceptionRenderer` 统一处理异常输出格式.
 
 ```php
+use Mitoop\Http\JsonExceptionRenderer;
 use Mitoop\Http\JsonResponder;
 
 ->withExceptions(function (Exceptions $exceptions) {
-    $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-        return app(JsonResponder::class)->error('未找到对应数据');
+    $exceptions->renderable(function (Throwable $e, $request) {
+        $exceptions->dontReport([
+            ClientSafeException::class,
+        ]);
+
+        $exceptions->map(JWTException::class, AuthenticationException::class);
+        $exceptions->map(ModelNotFoundException::class, function ($e) {
+            return new NotFoundHttpException('Resource not found', $e);
+        });
+        // ...
+        return app(JsonExceptionRenderer::class)->render($e, $request);
     });
 })
 ```

@@ -13,5 +13,6 @@ class JsonResponderServiceProvider extends ServiceProvider
         JsonResponder::class => JsonResponder::class,
         ResponseGenerator::class => ResponseGenerator::class,
         HeaderResolverInterface::class => NullHeaderResolver::class,
+        JsonExceptionRenderer::class => JsonExceptionRenderer::class,
     ];
 }
