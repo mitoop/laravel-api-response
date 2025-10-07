@@ -28,7 +28,7 @@ class ExceptionHandler
             ModelNotFoundException::class => fn ($e) => new NotFoundHttpException('Model not found', $e),
             RecordNotFoundException::class => fn ($e) => new NotFoundHttpException('Record not found', $e),
             RecordsNotFoundException::class => fn ($e) => new NotFoundHttpException('Records not found', $e),
-            MultipleRecordsFoundException::class => fn ($e) => new StandardException($e->getMessage(), $e),
+            MultipleRecordsFoundException::class => fn ($e) => new ClientSafeException($e->getMessage(), $e),
         ];
 
         $mappings = array_merge($defaults, $mappings);
@@ -40,8 +40,8 @@ class ExceptionHandler
 
     public function render(Throwable $e, Request $request): JsonResponse
     {
-        if ($e instanceof StandardException) {
-            return $this->responder->error($e->getMessage());
+        if ($e instanceof ClientSafeException) {
+            return $this->responder->error($e->getMessage(), $e->getErrorCode());
         }
 
         if ($e instanceof AuthenticationException) {
