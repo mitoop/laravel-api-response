@@ -1,12 +1,11 @@
 <h1 align="center">Laravel API Response</h1>
 
 ## ✨ 主要功能
-
-🎯  提供统一且标准化的响应格式  
-🔧  支持自定义状态码与扩展数据字段  
-📦  灵活设置响应头（可添加签名、追踪 ID、版本号等）  
-🚀  无缝兼容 Laravel API 资源  
-🐛  统一异常输出格式，确保前后端交互一致  
+🎯 提供统一且标准化的响应格式，同时支持普通分页与游标分页  
+🔧 支持自定义状态码与扩展字段  
+📦 灵活设置响应头（可添加签名、追踪 ID、版本号等）  
+🚀 无缝兼容 Laravel API 资源  
+🐛 已定制异常处理器，实现统一格式化输出  
 
 ## 环境需求
 以下为最低环境要求：
@@ -64,39 +63,39 @@ class Controller extends BaseController
 
 #### 可用方法
 
-包含三个方法 `success`, `error`, `deny`, 分别对应成功, 失败, 登录失效三种情况.
+包含三个方法 `success`, `error`, `deny`, 分别对应成功, 失败, 登录失效三种情况
 
 ```php
 class Controller extends BaseController
 {
     use RespondsWithJson;
 
-    public function one()
+    public function successEmpty()
     {
        return $this->success();
     }
 
-    public function two()
+    public function successWithData()
     {
        return $this->success(['Hello']);
     }
 
-    public function three()
+    public function successWithPagination()
     {
        return $this->success(User::active()->paginate());
     }
 
-    public function four()
+    public function errorDefault()
     {
        return $this->error();
     }
 
-    public function five()
+    public function errorCustomMessage()
     {
        return $this->error('自定义错误信息');
     }
 
-    public function six()
+    public function unauthorized()
     {
        return $this->deny('登录信息已失效, 请重新登陆!');
     }
@@ -121,10 +120,8 @@ app(JsonResponderDefault::class)->apply([
 ```
 
 ## API 资源
-
-支持 API 资源, `只需要`改下继承关系, 其他不需要任何改变.
-
-Tips: 更改下系统默认的 `stub`, 每次直接生成好继承关系.
+支持 API 资源, `只需要`改下继承关系, 其他不需要任何改变  
+Tips: 更改下系统默认的 `stub`, 每次直接生成好继承关系
 
 #### 普通资源继承 `Mitoop\Http\Resources\Resource`
 
@@ -148,10 +145,6 @@ class LoraResource extends Resource
 #### 资源集合继承 `Mitoop\Http\Resources\ResourceCollection`
 
 ```php
-use Mitoop\Http\Resources\Resource;
-
-namespace App\Http\Resources\User;
-
 use Mitoop\Http\Resources\ResourceCollection;
 
 class LoraCollection extends ResourceCollection
@@ -160,21 +153,21 @@ class LoraCollection extends ResourceCollection
 }
 ```
 
-#### 和原来一样直接返回
+#### 和原来一样，直接返回资源对象，自动应用统一响应格式
 
 ```php
 class Controller extends BaseController
 {
     public function show()
     {
+       // 直接返回标准化的 API Resource
        return new LoraResource(Lora::find(1));
     }
 }
 ```
 
 ## 异常
-
-通过 `JsonExceptionRenderer` 统一处理异常输出格式.
+已定制异常处理器，开发者只需少量配置即可实现统一格式化输出
 
 ```php
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -184,13 +177,12 @@ use Illuminate\Foundation\Configuration\Exceptions;
         ClientSafeException::class,
     ]);
     
-    // 特殊异常映射
+    // 只需要根据需求配置异常映射
+    // 其他异常由统一 Handler 接管，无需单独处理
     /** @noinspection PhpParamsInspection */
     $exceptions->map([
         JWTException::class => fn ($e) => new AuthenticationException
-    ]);
-    
-    // 其他异常将由统一的 Handler 接管，不需要单独处理
+    ]); 
 })
 ```
 
