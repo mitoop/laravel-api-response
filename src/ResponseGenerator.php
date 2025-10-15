@@ -66,6 +66,7 @@ class ResponseGenerator
     protected function prepareSuccessPayload($data, string $message, int $code, array $meta): array
     {
         $payload = [
+            'success' => true,
             'code' => $code,
             'message' => $message,
             'data' => $data ?? new stdClass,
@@ -81,6 +82,7 @@ class ResponseGenerator
     protected function prepareErrorPayload(string $message, int $code, mixed $errors): array
     {
         return $this->mergeExtra([
+            'success' => false,
             'code' => $code,
             'message' => $message,
             'data' => new stdClass,
