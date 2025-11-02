@@ -167,22 +167,25 @@ class Controller extends BaseController
 ```
 
 ## 异常
-已定制异常处理器，开发者只需少量配置即可实现统一格式化输出
+已定制异常处理器，开发者只需少量配置即可实现统一格式化输出，同时支持完全自定义异常逻辑。
 
+1. 在 `AppServiceProvider` 类中添加如下代码
+```php
+    use Illuminate\Contracts\Debug\ExceptionHandler;
+    use Mitoop\Http\Exceptions\Handler;
+    
+    public $singletons = [
+        ExceptionHandler::class => Handler::class,
+    ];
+```
+2. 在 `bootstrap/app.php` 中添加如下代码
 ```php
 use Illuminate\Foundation\Configuration\Exceptions;
 
-->withExceptions(function (Exceptions $exceptions) {
-    $exceptions->dontReport([
-        ClientSafeException::class,
-    ]);
-    
+->withExceptions(function (Exceptions $exceptions) {    
     // 只需要根据需求配置异常映射
     // 其他异常由统一 Handler 接管，无需单独处理
-    /** @noinspection PhpParamsInspection */
-    $exceptions->map([
-        JWTException::class => fn ($e) => new AuthenticationException
-    ]); 
+    $exceptions->map(JWTException::class, fn ($e) => new AuthenticationException); 
 })
 ```
 
