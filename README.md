@@ -21,33 +21,20 @@ composer require mitoop/laravel-api-response
 ## 输出格式
 ```jsonc
 {
-  "code": 0,                   // 状态码，默认成功0，失败1，登录失效-1
+  "success": true,             // 请求是否成功。true 表示成功，false 表示失败。由系统自动判断，无需手动设置。
+  "code": 0,                   // 状态码。默认值为 0（成功）、1（失败）、-1（登录失效），可通过 `setDefaults` 自定义。
   "message": "success",        // 提示信息
-  "data": {},                  // 主体内容
-  "meta": {                    // 分页信息，普通响应返回 {}，分页响应返回分页详情
-    "pagination": "page",      // 分页类型: page 或 cursor
-    "page": 1,                 // 当前页码（page分页）
+  "data": {},                  // 成功响应的主体内容
+  "meta": {                    // 分页信息对象，仅在分页响应时返回
+    "pagination": "page",      // 分页类型，可为 "page" 或 "cursor"
+    "page": 1,                 // 当前页码（仅 page 分页）
     "page_size": 20,           // 每页条数
     "has_more": false,         // 是否有下一页
-    "total": 100,              // 总条数（仅 paginate）
+    "total": 100,              // 总条数（仅 paginate 方法有，simplePaginate 没有）
     "next_cursor": "..."       // 下一个游标（仅 cursor 分页）
   },
-  "errors": {}                  // 错误信息对象（数组或对象）
+  "errors": {}                 // 错误详情对象，仅在请求失败时返回，类型可为 object 或 array
 }
-```
-
-```text
-code       : 状态码，默认值为 0（成功）、1（失败）、-1（登录失效），可通过 `setDefaults` 修改
-message    : 提示信息
-data       : 成功响应的主体内容
-meta       : 分页信息，普通响应返回 {}，分页响应返回分页详情
-  meta.pagination : 分页类型，可为 "page" 或 "cursor"
-  meta.page       : 当前页码（仅 page 分页）
-  meta.page_size  : 每页条数
-  meta.has_more   : 是否有下一页
-  meta.total      : 总条数（仅 paginate 方法有，simplePaginate 没有）
-  meta.next_cursor: 下一个游标（仅 cursor 分页）
-errors      : 错误信息对象(数组)，默认为空对象 {}
 ```
 
 ## 使用
