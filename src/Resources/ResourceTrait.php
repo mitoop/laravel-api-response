@@ -23,6 +23,7 @@ trait ResourceTrait
     public function with(Request $request): array
     {
         $data = [
+            'success' => true,
             'code' => app(JsonResponderDefault::class)->success(),
             'message' => 'ok',
             'meta' => new stdClass,
