@@ -2,6 +2,7 @@
 
 namespace Mitoop\Http\Resources;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Http\Resources\Json\ResourceCollection as Base;
 
 class ResourceCollection extends Base
@@ -10,6 +11,17 @@ class ResourceCollection extends Base
 
     public function paginationInformation($request, $paginated, $default): array
     {
+        if ($this->resource instanceof CursorPaginator) {
+            $meta = [
+                'pagination' => 'cursor',
+                'next_cursor' => (string) $this->resource->nextCursor()?->encode(),
+                'page_size' => $this->resource->perPage(),
+                'has_more' => $this->resource->hasMorePages(),
+            ];
+
+            return compact('meta');
+        }
+
         $meta = [
             'page' => $paginated['current_page'],
             'page_size' => $paginated['per_page'],
