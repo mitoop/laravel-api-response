@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mitoop\Http;
 
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 
 final class PaginationMeta
@@ -17,9 +18,7 @@ final class PaginationMeta
     public static function split(mixed $data): array
     {
         if ($data instanceof Paginator || $data instanceof CursorPaginator) {
-            $items = method_exists($data, 'getCollection') ? $data->getCollection() : $data->items();
-
-            return [$items, self::from($data)];
+            return [$data->items(), self::from($data)];
         }
 
         return [$data, []];
@@ -31,29 +30,45 @@ final class PaginationMeta
     public static function from(mixed $data): array
     {
         if ($data instanceof Paginator) {
-            $meta = [
-                'pagination' => 'page',
-                'page' => (int) $data->currentPage(),
-                'page_size' => (int) $data->perPage(),
-                'has_more' => (bool) $data->hasMorePages(),
-            ];
-
-            if (method_exists($data, 'total')) {
-                $meta['total'] = (int) $data->total();
-            }
-
-            return $meta;
+            return self::page($data);
         }
 
         if ($data instanceof CursorPaginator) {
-            return [
-                'pagination' => 'cursor',
-                'page_size' => (int) $data->perPage(),
-                'has_more' => (bool) $data->hasMorePages(),
-                'next_cursor' => $data->nextCursor()?->encode(),
-            ];
+            return self::cursor($data);
         }
 
         return [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function page(Paginator $paginator): array
+    {
+        $meta = [
+            'pagination' => 'page',
+            'page' => (int) $paginator->currentPage(),
+            'page_size' => (int) $paginator->perPage(),
+            'has_more' => (bool) $paginator->hasMorePages(),
+        ];
+
+        if ($paginator instanceof LengthAwarePaginator) {
+            $meta['total'] = (int) $paginator->total();
+        }
+
+        return $meta;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function cursor(CursorPaginator $paginator): array
+    {
+        return [
+            'pagination' => 'cursor',
+            'page_size' => (int) $paginator->perPage(),
+            'has_more' => (bool) $paginator->hasMorePages(),
+            'next_cursor' => $paginator->nextCursor()?->encode(),
+        ];
     }
 }
