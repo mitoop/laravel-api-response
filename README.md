@@ -25,6 +25,7 @@ composer require mitoop/laravel-api-response
 如果需要修改默认值，在 `AppServiceProvider` 的 `boot` 方法中调用 `apply`。未出现的配置项保持默认值：
 
 ```php
+use Illuminate\Support\Str;
 use Mitoop\Http\ResponderConfig;
 
 public function boot(): void
@@ -34,13 +35,13 @@ public function boot(): void
             'deny' => 401,
         ],
         'extra' => [
-            'request_id' => fn () => (string) request()->header('X-Request-Id'),
+            'request_id' => fn () => (string) Str::uuid7(),
         ],
     ]);
 }
 ```
 
-`extra` 会合并到每次响应的最外层。值可以是闭包，闭包在生成响应时执行，因此适合放入请求级数据。如果某次响应已经提供了同名字段，对应闭包不会执行。
+`extra` 会合并到每次响应的最外层。值可以是闭包，闭包在生成响应时执行。上面的 `request_id` 由应用自己生成。如果某次响应已经提供了同名字段，对应闭包不会执行。
 
 `success`、`code`、`message`、`data`、`meta` 和 `errors` 是保留字段。写在 `extra` 中的同名字段会被忽略。
 
