@@ -128,6 +128,34 @@ final class EnvelopeTest extends PackageTestCase
         $response->assertJsonMissingPath('errors');
     }
 
+    public function test_resource_uses_configured_success_status_and_skips_overridden_extra_closures(): void
+    {
+        $calls = 0;
+        $this->app->make(ResponderConfig::class)->apply([
+            'http_status' => ['success' => 201],
+            'extra' => [
+                'request_id' => function () use (&$calls) {
+                    return ++$calls;
+                },
+            ],
+        ]);
+
+        $request = Request::create('/items');
+        $this->app->instance('request', $request);
+        $configured = $this->respond((new EnvelopeResource(['id' => 1]))->toResponse($request));
+        $overridden = $this->respond(
+            (new EnvelopeResource(['id' => 2]))
+                ->withStatus(202)
+                ->additional(['request_id' => 'fixed'])
+                ->toResponse($request)
+        );
+
+        $this->respond($this->responder()->success())->assertStatus(201);
+        $configured->assertStatus(201)->assertJsonPath('request_id', 1);
+        $overridden->assertStatus(202)->assertJsonPath('request_id', 'fixed');
+        $this->assertSame(2, $calls);
+    }
+
     private function responder(): Responder
     {
         return $this->app->make(Responder::class);

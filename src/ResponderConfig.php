@@ -114,11 +114,20 @@ class ResponderConfig
     }
 
     /**
+     * @param  array<array-key, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    public function mergedExtra(array $overrides = []): array
+    {
+        return $this->onlyExtra(array_merge($this->extra, $overrides));
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function extra(): array
     {
-        return $this->onlyExtra($this->extra);
+        return $this->mergedExtra();
     }
 
     public function success(): int

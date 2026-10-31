@@ -34,20 +34,28 @@ class EnvelopeFactory
      */
     public function generateResource(mixed $data, mixed $source, array $overrides = [], ?int $status = null): JsonResponse
     {
-        $message = isset($overrides['message']) ? (string) $overrides['message'] : $this->config->successMessage();
-        $payload = array_merge(
-            $this->successPayload($data, $message, $this->config->success(), PaginationMeta::from($source)),
-            $this->config->onlyExtra($overrides),
-        );
+        $message = isset($overrides['message']) && is_string($overrides['message'])
+            ? $overrides['message']
+            : $this->config->successMessage();
 
-        return $this->send($payload, $status ?? 200);
+        return $this->send(
+            $this->successPayload(
+                $data,
+                $message,
+                $this->config->success(),
+                PaginationMeta::from($source),
+                $this->config->mergedExtra($overrides),
+            ),
+            $status ?? $this->config->successStatus(),
+        );
     }
 
     /**
      * @param  array<string, mixed>  $meta
+     * @param  array<string, mixed>|null  $extra
      * @return array<string, mixed>
      */
-    protected function successPayload(mixed $data, string $message, int $code, array $meta): array
+    protected function successPayload(mixed $data, string $message, int $code, array $meta, ?array $extra = null): array
     {
         $payload = [
             'success' => true,
@@ -60,7 +68,7 @@ class EnvelopeFactory
             $payload['meta'] = $meta;
         }
 
-        return array_merge($payload, $this->config->extra());
+        return array_merge($payload, $extra ?? $this->config->extra());
     }
 
     /**
