@@ -1,28 +1,52 @@
-<h1 align="center">Laravel API Response</h1>
+# Laravel API Response
 
-<p align="center">为 Laravel API 提供统一的 JSON 响应格式。</p>
-
-## ✨ 主要功能
-
-🎯 统一 `success`、`code`、`message`、`data` 结构，并支持页码分页与游标分页  
-🔧 业务码、提示文案、HTTP 状态和扩展字段都可以配置  
-📦 响应头可按响应体生成，适合放签名、追踪 ID 或版本号  
-🚀 直接返回 API Resource 时，自动套用同一份格式
-
-## 环境需求
-
-- PHP 8.2 及以上
-- Laravel 11、12 或 13
+Laravel API Response 为接口提供统一的 JSON 结构。成功、失败和 API Resource 使用同一组字段：`success`、`code`、`message` 和 `data`。分页响应额外包含 `meta`，失败响应额外包含 `errors`。
 
 ## 安装
+
+通过 Composer 安装：
 
 ```shell
 composer require mitoop/laravel-api-response
 ```
 
+要求 PHP 8.2 及以上，以及 Laravel 11、12 或 13。
+
+## 配置
+
+安装后即可使用，不必发布配置文件。默认值如下：
+
+| 配置 | 默认值 |
+| --- | --- |
+| `success` / `error` / `deny` | 业务码 `0` / `1` / `-1` |
+| `message.success` / `message.error` / `message.deny` | `ok` / `error` / `unauthorized` |
+| `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
+
+如果需要修改默认值，在 `AppServiceProvider` 的 `boot` 方法中调用 `apply`。未出现的配置项保持默认值：
+
+```php
+use Mitoop\Http\ResponderConfig;
+
+public function boot(): void
+{
+    app(ResponderConfig::class)->apply([
+        'http_status' => [
+            'deny' => 401,
+        ],
+        'extra' => [
+            'request_id' => fn () => (string) request()->header('X-Request-Id'),
+        ],
+    ]);
+}
+```
+
+`extra` 会合并到每次响应的最外层。值可以是闭包，闭包在生成响应时执行，因此适合放入请求级数据。如果某次响应已经提供了同名字段，对应闭包不会执行。
+
+`success`、`code`、`message`、`data`、`meta` 和 `errors` 是保留字段。写在 `extra` 中的同名字段会被忽略。
+
 ## 响应格式
 
-成功时返回 `success`、`code`、`message`、`data`。分页响应才有 `meta`，失败响应才有 `errors`。
+成功响应：
 
 ```json
 {
@@ -36,13 +60,9 @@ composer require mitoop/laravel-api-response
 }
 ```
 
-`data` 没有内容时是 `{}`，列表是数组。
+`data` 没有内容时为 JSON 对象 `{}`，列表为数组。业务码放在 `code` 中。HTTP 状态单独设置，默认均为 `200`。
 
-业务码放在 `code`。HTTP 状态单独设置，`success()`、`error()`、`deny()` 默认都是 `200`。
-
-### 分页
-
-页码分页：
+分页信息放在与 `data` 同级的 `meta` 中。页码分页：
 
 ```json
 {
@@ -54,9 +74,7 @@ composer require mitoop/laravel-api-response
 }
 ```
 
-`simplePaginate()` 没有 `total`。
-
-游标分页：
+`simplePaginate` 不返回 `total`。游标分页：
 
 ```json
 {
@@ -69,7 +87,7 @@ composer require mitoop/laravel-api-response
 
 没有下一页时，`next_cursor` 为 `null`。
 
-### 失败
+失败响应：
 
 ```json
 {
@@ -83,12 +101,19 @@ composer require mitoop/laravel-api-response
 }
 ```
 
-## 在控制器中使用
+## 使用
+
+在控制器中引入 `RespondsWithJson`。`success`、`error` 和 `deny` 分别表示成功、失败和登录失效：
 
 ```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
 use Mitoop\Http\RespondsWithJson;
 
-class Controller extends BaseController
+class UserController extends Controller
 {
     use RespondsWithJson;
 
@@ -97,62 +122,49 @@ class Controller extends BaseController
         return $this->success(User::query()->paginate());
     }
 
-    public function empty()
+    public function store()
     {
-        return $this->success();
+        return $this->error('名称必填', errors: [
+            'name' => ['名称必填'],
+        ], status: 422);
     }
 
-    public function invalid()
+    public function destroy()
     {
-        return $this->error('名称必填', errors: ['name' => ['名称必填']], status: 422);
-    }
-
-    public function unauthorized()
-    {
-        return $this->deny('登录信息已失效，请重新登录', status: 401);
+        return $this->deny('登录信息已失效，请重新登录');
     }
 }
 ```
 
-`success()`、`error()`、`deny()` 分别表示成功、失败和登录失效。`status` 只改变 HTTP 状态，不改变 `code`。
-
-游标分页把 `paginate()` 换成 `cursorPaginate()` 即可。
-
-## 配置
-
-在 `AppServiceProvider::boot()` 里调用 `apply()`。没写的项目保持默认值。
-
-| 配置 | 默认值 |
-| --- | --- |
-| `success` / `error` / `deny` | 业务码 `0` / `1` / `-1` |
-| `message.success` / `message.error` / `message.deny` | `ok` / `error` / `unauthorized` |
-| `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
+`status` 参数只改变 HTTP 状态，不改变 `code`。省略数据时，直接调用 `success`：
 
 ```php
-use Mitoop\Http\ResponderConfig;
-
-app(ResponderConfig::class)->apply([
-    'http_status' => [
-        'deny' => 401,
-    ],
-    'extra' => [
-        'request_id' => fn () => app('request_id'),
-    ],
-]);
+return $this->success();
 ```
 
-`extra` 会合并到每次响应的最外层。值可以是闭包，闭包在每次响应时执行。`success`、`code`、`message`、`data`、`meta`、`errors` 是保留字段，写在 `extra` 里会被忽略。
+游标分页将 `paginate` 替换为 `cursorPaginate`：
+
+```php
+return $this->success(User::query()->cursorPaginate());
+```
 
 ## API 资源
 
-资源类改掉父类后，直接返回即可。字段、分页信息和响应头与 `success()` 一致。
+让资源类继承本包提供的基类，然后像平时一样返回资源。响应字段、分页信息和响应头与 `success` 一致。未调用 `withStatus` 时，HTTP 状态使用 `http_status.success`。
 
 ```php
+<?php
+
+namespace App\Http\Resources;
+
 use Illuminate\Http\Request;
 use Mitoop\Http\Resources\Resource;
 
 class UserResource extends Resource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
@@ -164,19 +176,22 @@ class UserResource extends Resource
 ```
 
 ```php
+<?php
+
+namespace App\Http\Resources;
+
 use Mitoop\Http\Resources\ResourceCollection;
 
 class UserCollection extends ResourceCollection
 {
+    //
 }
 ```
 
 ```php
 public function show(User $user)
 {
-    return (new UserResource($user))
-        ->withMessage('创建成功')
-        ->withStatus(201);
+    return new UserResource($user);
 }
 
 public function index()
@@ -185,21 +200,38 @@ public function index()
 }
 ```
 
-`withMessage()` 修改这次响应的 `message`。`withStatus()` 修改这次响应的 HTTP 状态。
+如果只想修改这一次响应的文案或 HTTP 状态，可以链式调用 `withMessage` 和 `withStatus`。单条资源和集合都支持：
 
-执行 `php artisan stub:publish` 后，把 `stubs/resource.stub` 的父类改成 `Mitoop\Http\Resources\Resource`，把 `stubs/resource-collection.stub` 的父类改成 `Mitoop\Http\Resources\ResourceCollection`。之后 `make:resource` 会直接生成对应的继承关系。
+```php
+return (new UserResource($user))
+    ->withMessage('创建成功')
+    ->withStatus(201);
+
+return (new UserCollection(User::query()->paginate()))
+    ->withMessage('获取成功');
+```
+
+执行 `php artisan stub:publish` 后，将 `stubs/resource.stub` 的父类改为 `Mitoop\Http\Resources\Resource`，将 `stubs/resource-collection.stub` 的父类改为 `Mitoop\Http\Resources\ResourceCollection`。之后 `make:resource` 会生成对应的继承关系。
 
 ## 响应头
 
-实现 `Mitoop\Http\Headers\HeaderResolverInterface`，在服务提供者的 `register()` 里替换默认绑定。控制器响应和 API Resource 都会带上这些响应头。
+实现 `HeaderResolverInterface`，并在服务提供者的 `register` 方法中替换默认绑定。控制器返回的响应和 API Resource 都会带上这些响应头。
 
-用传入的 `$jsonOptions` 编码 payload，结果与响应体一致，可以直接用来签名。
+使用参数中的 `$jsonOptions` 编码 payload，得到的字符串与响应体一致，因此可以直接用于签名：
 
 ```php
+<?php
+
+namespace App\Http;
+
 use Mitoop\Http\Headers\HeaderResolverInterface;
 
 class SignatureHeader implements HeaderResolverInterface
 {
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, string>
+     */
     public function resolve(array $payload, int $jsonOptions): array
     {
         return [
@@ -219,23 +251,64 @@ public function register(): void
 }
 ```
 
-## 异常
+## 异常处理
 
-异常仍由应用自己处理。需要统一成上面的 JSON 格式时，在 `bootstrap/app.php` 里调用 `Responder`。返回 `null` 的请求继续走 Laravel 原来的处理。
+框架的异常处理保持不变。如果希望接口异常也使用上述 JSON 结构，在应用中添加一个可调用的 `ApiExceptionRenderer`：
 
 ```php
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\Request;
-use Mitoop\Http\Responder;
+<?php
 
-->withExceptions(function (Exceptions $exceptions) {
-    $exceptions->render(function (AuthenticationException $e, Request $request) {
+namespace App\Exceptions;
+
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
+use Mitoop\Http\Responder;
+use stdClass;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
+
+class ApiExceptionRenderer
+{
+    public function __construct(private Responder $responder) {}
+
+    public function __invoke(Throwable $e, Request $request): JsonResponse|false
+    {
         if (! $request->expectsJson()) {
-            return null;
+            return false;
         }
 
-        return app(Responder::class)->deny('登录信息已失效，请重新登录');
-    });
+        return match (true) {
+            $e instanceof AuthenticationException => $this->responder->deny('请先登录'),
+            $e instanceof ValidationException => $this->responder->error(
+                (string) Arr::first(Arr::flatten($e->errors())),
+                errors: $e->errors(),
+            ),
+            $e instanceof NotFoundHttpException => $this->responder->error('没有找到对应内容'),
+            default => $this->responder->error(
+                '服务暂时不可用，请稍后再试',
+                errors: app()->hasDebugModeEnabled() ? [
+                    'exception' => $e::class,
+                    'message' => $e->getMessage(),
+                ] : new stdClass,
+            ),
+        };
+    }
+}
+```
+
+不是 JSON 请求时返回 `false`，Laravel 会继续使用原来的异常页面或重定向。
+
+然后在 `bootstrap/app.php` 中注册。应用自己的业务异常可以用同样的方式加入 `match`：
+
+```php
+use App\Exceptions\ApiExceptionRenderer;
+use Illuminate\Http\Request;
+
+->withExceptions(function (Exceptions $exceptions) {
+    $exceptions->render(fn (Throwable $e, Request $request) => app(ApiExceptionRenderer::class)($e, $request));
 });
 ```
 
