@@ -1,16 +1,18 @@
 <h1 align="center">Laravel API Response</h1>
 
+<p align="center">为 Laravel API 提供统一的 JSON 响应格式。</p>
+
 ## ✨ 主要功能
-🎯 提供统一且标准化的响应格式，同时支持普通分页与游标分页  
-🔧 支持自定义状态码与扩展字段  
-📦 灵活设置响应头（可添加签名、追踪 ID、版本号等）  
-🚀 无缝兼容 Laravel API 资源  
-🐛 已定制异常处理器，实现统一格式化输出  
+
+🎯 统一 `success`、`code`、`message`、`data` 结构，并支持页码分页与游标分页  
+🔧 业务码、提示文案、HTTP 状态和扩展字段都可以配置  
+📦 响应头可按响应体生成，适合放签名、追踪 ID 或版本号  
+🚀 直接返回 API Resource 时，自动套用同一份格式
 
 ## 环境需求
-以下为最低环境要求：
-- PHP >= 8.2
-- Laravel ^11.0｜^12.0
+
+- PHP 8.2 及以上
+- Laravel 11、12 或 13
 
 ## 安装
 
@@ -18,26 +20,70 @@
 composer require mitoop/laravel-api-response
 ```
 
-## 输出格式
-```jsonc
+## 响应格式
+
+成功时返回 `success`、`code`、`message`、`data`。分页响应才有 `meta`，失败响应才有 `errors`。
+
+```json
 {
-  "success": true,             // 请求是否成功。true 表示成功，false 表示失败。由系统自动判断，无需手动设置。
-  "code": 0,                   // 状态码。默认值为 0（成功）、1（失败）、-1（登录失效），可通过 `setDefaults` 自定义。
-  "message": "success",        // 提示信息
-  "data": {},                  // 成功响应的主体内容
-  "meta": {                    // 分页信息对象，仅在分页响应时返回
-    "pagination": "page",      // 分页类型，可为 "page" 或 "cursor"
-    "page": 1,                 // 当前页码（仅 page 分页）
-    "page_size": 20,           // 每页条数
-    "has_more": false,         // 是否有下一页
-    "total": 100,              // 总条数（仅 paginate 方法有，simplePaginate 没有）
-    "next_cursor": "..."       // 下一个游标（仅 cursor 分页）
-  },
-  "errors": {}                 // 错误详情对象，仅在请求失败时返回，类型可为 object 或 array
+  "success": true,
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "id": 1,
+    "name": "Ada"
+  }
 }
 ```
 
-## 使用
+`data` 没有内容时是 `{}`，列表是数组。
+
+业务码放在 `code`。HTTP 状态单独设置，`success()`、`error()`、`deny()` 默认都是 `200`。
+
+### 分页
+
+页码分页：
+
+```json
+{
+  "pagination": "page",
+  "page": 1,
+  "page_size": 20,
+  "has_more": false,
+  "total": 100
+}
+```
+
+`simplePaginate()` 没有 `total`。
+
+游标分页：
+
+```json
+{
+  "pagination": "cursor",
+  "page_size": 20,
+  "has_more": true,
+  "next_cursor": "eyJpZCI6MX0"
+}
+```
+
+没有下一页时，`next_cursor` 为 `null`。
+
+### 失败
+
+```json
+{
+  "success": false,
+  "code": 1,
+  "message": "名称必填",
+  "data": {},
+  "errors": {
+    "name": ["名称必填"]
+  }
+}
+```
+
+## 在控制器中使用
 
 ```php
 use Mitoop\Http\RespondsWithJson;
@@ -45,78 +91,67 @@ use Mitoop\Http\RespondsWithJson;
 class Controller extends BaseController
 {
     use RespondsWithJson;
-}
-```
 
-#### 可用方法
-
-包含三个方法 `success`, `error`, `deny`, 分别对应成功, 失败, 登录失效三种情况
-
-```php
-class Controller extends BaseController
-{
-    use RespondsWithJson;
-
-    public function successEmpty()
+    public function index()
     {
-       return $this->success();
+        return $this->success(User::query()->paginate());
     }
 
-    public function successWithData()
+    public function empty()
     {
-       return $this->success(['Hello']);
+        return $this->success();
     }
 
-    public function successWithPagination()
+    public function invalid()
     {
-       return $this->success(User::active()->paginate());
-    }
-
-    public function errorDefault()
-    {
-       return $this->error();
-    }
-
-    public function errorCustomMessage()
-    {
-       return $this->error('自定义错误信息');
+        return $this->error('名称必填', errors: ['name' => ['名称必填']], status: 422);
     }
 
     public function unauthorized()
     {
-       return $this->deny('登录信息已失效, 请重新登陆!');
+        return $this->deny('登录信息已失效，请重新登录', status: 401);
     }
 }
 ```
 
-## 自定义状态码以及扩展字段
+`success()`、`error()`、`deny()` 分别表示成功、失败和登录失效。`status` 只改变 HTTP 状态，不改变 `code`。
 
-在 `AppServiceProvider@boot` 方法中添加如下代码
+游标分页把 `paginate()` 换成 `cursorPaginate()` 即可。
+
+## 配置
+
+在 `AppServiceProvider::boot()` 里调用 `apply()`。没写的项目保持默认值。
+
+| 配置 | 默认值 |
+| --- | --- |
+| `success` / `error` / `deny` | 业务码 `0` / `1` / `-1` |
+| `message.success` / `message.error` / `message.deny` | `ok` / `error` / `unauthorized` |
+| `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
 
 ```php
-use Mitoop\Http\JsonResponderDefault;
+use Mitoop\Http\ResponderConfig;
 
-app(JsonResponderDefault::class)->apply([
-    'success' => 0,
-    'error' => 1,
-    'deny' => -1,
+app(ResponderConfig::class)->apply([
+    'http_status' => [
+        'deny' => 401,
+    ],
     'extra' => [
-       'request_id' => app('request_id'),
+        'request_id' => fn () => app('request_id'),
     ],
 ]);
 ```
 
-## API 资源
-支持 API 资源, `只需要`改下继承关系, 其他不需要任何改变  
-Tips: 更改下系统默认的 `stub`, 每次直接生成好继承关系
+`extra` 会合并到每次响应的最外层。值可以是闭包，闭包在每次响应时执行。`success`、`code`、`message`、`data`、`meta`、`errors` 是保留字段，写在 `extra` 里会被忽略。
 
-#### 普通资源继承 `Mitoop\Http\Resources\Resource`
+## API 资源
+
+资源类改掉父类后，直接返回即可。字段、分页信息和响应头与 `success()` 一致。
 
 ```php
 use Illuminate\Http\Request;
 use Mitoop\Http\Resources\Resource;
 
-class LoraResource extends Resource
+class UserResource extends Resource
 {
     public function toArray(Request $request): array
     {
@@ -126,54 +161,82 @@ class LoraResource extends Resource
         ];
     }
 }
-
 ```
-
-#### 资源集合继承 `Mitoop\Http\Resources\ResourceCollection`
 
 ```php
 use Mitoop\Http\Resources\ResourceCollection;
 
-class LoraCollection extends ResourceCollection
+class UserCollection extends ResourceCollection
 {
-
 }
 ```
 
-#### 和原来一样，直接返回资源对象，自动应用统一响应格式
+```php
+public function show(User $user)
+{
+    return (new UserResource($user))
+        ->withMessage('创建成功')
+        ->withStatus(201);
+}
+
+public function index()
+{
+    return new UserCollection(User::query()->paginate());
+}
+```
+
+`withMessage()` 修改这次响应的 `message`。`withStatus()` 修改这次响应的 HTTP 状态。
+
+执行 `php artisan stub:publish` 后，把 `stubs/resource.stub` 的父类改成 `Mitoop\Http\Resources\Resource`，把 `stubs/resource-collection.stub` 的父类改成 `Mitoop\Http\Resources\ResourceCollection`。之后 `make:resource` 会直接生成对应的继承关系。
+
+## 响应头
+
+实现 `Mitoop\Http\Headers\HeaderResolverInterface`，在服务提供者的 `register()` 里替换默认绑定。控制器响应和 API Resource 都会带上这些响应头。
+
+用传入的 `$jsonOptions` 编码 payload，结果与响应体一致，可以直接用来签名。
 
 ```php
-class Controller extends BaseController
+use Mitoop\Http\Headers\HeaderResolverInterface;
+
+class SignatureHeader implements HeaderResolverInterface
 {
-    public function show()
+    public function resolve(array $payload, int $jsonOptions): array
     {
-       // 直接返回标准化的 API Resource
-       return new LoraResource(Lora::find(1));
+        return [
+            'X-Signature' => hash('sha256', json_encode($payload, $jsonOptions)),
+        ];
     }
 }
 ```
 
-## 异常
-已定制异常处理器，开发者只需少量配置即可实现统一格式化输出，同时支持完全自定义异常逻辑。
-
-1. 在 `AppServiceProvider` 类中添加如下代码
 ```php
-    use Illuminate\Contracts\Debug\ExceptionHandler;
-    use Mitoop\Http\Exceptions\Handler;
-    
-    public $singletons = [
-        ExceptionHandler::class => Handler::class,
-    ];
+use App\Http\SignatureHeader;
+use Mitoop\Http\Headers\HeaderResolverInterface;
+
+public function register(): void
+{
+    $this->app->singleton(HeaderResolverInterface::class, SignatureHeader::class);
+}
 ```
-2. 在 `bootstrap/app.php` 中添加如下代码
-```php
-use Illuminate\Foundation\Configuration\Exceptions;
 
-->withExceptions(function (Exceptions $exceptions) {    
-    // 只需要根据需求配置异常映射
-    // 其他异常由统一 Handler 接管，无需单独处理
-    $exceptions->map(JWTException::class, fn ($e) => new AuthenticationException); 
-})
+## 异常
+
+异常仍由应用自己处理。需要统一成上面的 JSON 格式时，在 `bootstrap/app.php` 里调用 `Responder`。返回 `null` 的请求继续走 Laravel 原来的处理。
+
+```php
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Request;
+use Mitoop\Http\Responder;
+
+->withExceptions(function (Exceptions $exceptions) {
+    $exceptions->render(function (AuthenticationException $e, Request $request) {
+        if (! $request->expectsJson()) {
+            return null;
+        }
+
+        return app(Responder::class)->deny('登录信息已失效，请重新登录');
+    });
+});
 ```
 
 ## License

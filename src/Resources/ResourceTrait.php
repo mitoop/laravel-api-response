@@ -1,35 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mitoop\Http\Resources;
 
-use Illuminate\Http\Request;
-use Mitoop\Http\JsonResponderDefault;
-use stdClass;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Mitoop\Http\EnvelopeFactory;
 
+/**
+ * @mixin JsonResource
+ */
 trait ResourceTrait
 {
-    public function withMessage($message): static
+    protected ?int $responseStatus = null;
+
+    public function withMessage(string $message): static
     {
         $this->with['message'] = $message;
 
         return $this;
     }
 
-    public function jsonOptions(): int
+    public function withStatus(int $status): static
     {
-        return JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+        $this->responseStatus = $status;
+
+        return $this;
     }
 
-    public function with(Request $request): array
+    public function jsonOptions(): int
     {
-        $data = [
-            'success' => true,
-            'code' => app(JsonResponderDefault::class)->success(),
-            'message' => 'ok',
-            'meta' => new stdClass,
-            'errors' => new stdClass,
-        ];
+        return EnvelopeFactory::JSON_OPTIONS;
+    }
 
-        return array_merge($data, app(JsonResponderDefault::class)->extra() ?: []);
+    public function toResponse($request): JsonResponse
+    {
+        return app(EnvelopeFactory::class)->generateResource(
+            $this->resolve($request),
+            $this->resource,
+            array_merge($this->with($request), $this->additional),
+            $this->responseStatus,
+        );
     }
 }

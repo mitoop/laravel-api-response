@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Mitoop\Http;
 
 use Illuminate\Support\ServiceProvider;
 use Mitoop\Http\Headers\HeaderResolverInterface;
 use Mitoop\Http\Headers\NullHeaderResolver;
 
-class JsonResponderServiceProvider extends ServiceProvider
+class ResponderServiceProvider extends ServiceProvider
 {
     public array $singletons = [
-        JsonResponderDefault::class => JsonResponderDefault::class,
-        JsonResponder::class => JsonResponder::class,
-        ResponseGenerator::class => ResponseGenerator::class,
+        ResponderConfig::class => ResponderConfig::class,
+        Responder::class => Responder::class,
+        EnvelopeFactory::class => EnvelopeFactory::class,
         HeaderResolverInterface::class => NullHeaderResolver::class,
     ];
 }
