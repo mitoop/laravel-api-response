@@ -1,13 +1,11 @@
-# Laravel API Response
-
 <p align="center">🍎 为 Laravel API 提供统一的 JSON 响应格式</p>
 
 Laravel API Response 为接口提供统一的 JSON 结构。成功和失败都包含 `success`、`code`、`message`、`data`。失败再带 `errors`，分页再带 `meta`。已有的 API Resource 几乎不用改动，返回时就会套用同一套格式。
 
 ## 环境要求
 
-* PHP ^8.2
-* Laravel ^11.0 | ^12.0 | ^13.0
+- PHP ^8.2
+- Laravel ^11.0 | ^12.0 | ^13.0
 
 ## 安装
 
@@ -21,10 +19,10 @@ composer require mitoop/laravel-api-response
 
 安装后即可使用。默认值如下：
 
-| 配置 | 默认值 |
-| --- | --- |
-| `success` / `error` / `deny` | 业务码 `0` / `1` / `-1` |
-| `message.success` / `message.error` / `message.deny` | `ok` / `error` / `unauthorized` |
+| 配置                                                             | 默认值                          |
+| ---------------------------------------------------------------- | ------------------------------- |
+| `success` / `error` / `deny`                                     | 业务码 `0` / `1` / `-1`         |
+| `message.success` / `message.error` / `message.deny`             | `ok` / `error` / `unauthorized` |
 | `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
 
 要改默认值，在 `AppServiceProvider` 的 `boot` 里调用 `apply`。没传入的项保持默认值：
@@ -160,7 +158,7 @@ return $this->success(User::query()->cursorPaginate());
 
 ## API 资源
 
-资源类继承本包的基类，返回方式和原来一样。字段、分页和响应头与 `success` 一致。没有调用 `withStatus` 时，HTTP 状态用 `http_status.success`。
+资源类只要改成继承本包的基类即可。使用方式不用变，还是直接返回资源，响应就会按统一结构输出。
 
 ```php
 <?php
