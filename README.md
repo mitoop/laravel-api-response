@@ -1,4 +1,4 @@
-<p align="center">🍎 为 Laravel API 提供统一的 JSON 响应格式</p>
+<h2 align="center">🍎 为 Laravel API 提供统一的 JSON 响应格式</h2>
 
 Laravel API Response 为接口提供统一的 JSON 结构。成功和失败都包含 `success`、`code`、`message`、`data`。失败再带 `errors`，分页再带 `meta`。已有的 API Resource 几乎不用改动，返回时就会套用同一套格式。
 
