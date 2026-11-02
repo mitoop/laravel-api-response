@@ -59,8 +59,18 @@ use Mitoop\Http\ResponderConfig;
 public function boot(): void
 {
     app(ResponderConfig::class)->apply([
+        'success' => 0,
+        'error' => 1,
+        'deny' => -1,
+        'message' => [
+            'success' => 'ok',
+            'error' => 'error',
+            'deny' => 'unauthorized',
+        ],
         'http_status' => [
-            'deny' => 401,
+            'success' => 200,
+            'error' => 200,
+            'deny' => 200,
         ],
         'extra' => [
             'request_id' => fn () => (string) Str::uuid7(),
