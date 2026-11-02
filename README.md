@@ -160,7 +160,7 @@ public function boot(): void
 
 ## 使用
 
-在控制器中引入 `RespondsWithJson`。`success` 表示成功，`error` 表示失败，`deny` 表示认证失败：
+在控制器中引入 `RespondsWithJson`。`success` 方法返回成功响应，`error` 方法返回失败响应，`deny` 方法返回认证失败响应：
 
 ```php
 <?php
