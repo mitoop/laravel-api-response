@@ -46,7 +46,7 @@ composer require mitoop/laravel-api-response
 
 | 配置                                                             | 默认值                          |
 | ---------------------------------------------------------------- | ------------------------------- |
-| `success` / `error` / `deny`                                     | 业务码 `0` / `1` / `-1`         |
+| 成功 `success` / 失败 `error` / 认证失效 `deny` | 业务码 `0` / `1` / `-1` |
 | `message.success` / `message.error` / `message.deny`             | `ok` / `error` / `unauthorized` |
 | `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
 
