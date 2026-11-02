@@ -52,7 +52,7 @@ public function boot(): void
 
 ## 响应格式
 
-成功响应：
+**成功响应：**
 
 ```json
 {
@@ -97,7 +97,7 @@ public function boot(): void
 
 没有下一页时，`next_cursor` 为 `null`。
 
-失败响应：
+**失败响应：**
 
 ```json
 {
