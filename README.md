@@ -1,6 +1,8 @@
 # Laravel API Response
 
-Laravel API Response 为接口提供统一的 JSON 结构。成功和失败都包含 `success`、`code`、`message`、`data`。失败再带 `errors`，分页再带 `meta`。API Resource 走成功响应。
+<p align="center">🍎 为 Laravel API 提供统一的 JSON 响应格式</p>
+
+Laravel API Response 为接口提供统一的 JSON 结构。成功和失败都包含 `success`、`code`、`message`、`data`。失败再带 `errors`，分页再带 `meta`。已有的 API Resource 几乎不用改动，返回时就会套用同一套格式。
 
 ## 环境要求
 
@@ -66,7 +68,9 @@ public function boot(): void
 
 `data` 为空时是 JSON 对象 `{}`，列表是数组。业务码在 `code`。HTTP 状态单独设置，默认都是 `200`。
 
-分页信息在 `meta`，与 `data` 同级。页码分页：
+分页信息在 `meta`，与 `data` 同级。
+
+页码分页：
 
 ```json
 {
@@ -78,7 +82,9 @@ public function boot(): void
 }
 ```
 
-`simplePaginate` 不带 `total`。游标分页：
+`simplePaginate` 不带 `total`。
+
+游标分页：
 
 ```json
 {
