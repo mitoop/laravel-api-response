@@ -1,6 +1,11 @@
 # Laravel API Response
 
-Laravel API Response 为接口提供统一的 JSON 结构。成功、失败和 API Resource 使用同一组字段：`success`、`code`、`message` 和 `data`。分页响应额外包含 `meta`，失败响应额外包含 `errors`。
+Laravel API Response 为接口提供统一的 JSON 结构。成功和失败都包含 `success`、`code`、`message`、`data`。失败再带 `errors`，分页再带 `meta`。API Resource 走成功响应。
+
+## 环境要求
+
+* PHP ^8.2
+* Laravel ^11.0 | ^12.0 | ^13.0
 
 ## 安装
 
@@ -10,11 +15,9 @@ Laravel API Response 为接口提供统一的 JSON 结构。成功、失败和 A
 composer require mitoop/laravel-api-response
 ```
 
-要求 PHP 8.2 及以上，以及 Laravel 11、12 或 13。
-
 ## 配置
 
-安装后即可使用，不必发布配置文件。默认值如下：
+安装后即可使用。默认值如下：
 
 | 配置 | 默认值 |
 | --- | --- |
@@ -22,7 +25,7 @@ composer require mitoop/laravel-api-response
 | `message.success` / `message.error` / `message.deny` | `ok` / `error` / `unauthorized` |
 | `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
 
-如果需要修改默认值，在 `AppServiceProvider` 的 `boot` 方法中调用 `apply`。未出现的配置项保持默认值：
+要改默认值，在 `AppServiceProvider` 的 `boot` 里调用 `apply`。没传入的项保持默认值：
 
 ```php
 use Illuminate\Support\Str;
@@ -41,9 +44,9 @@ public function boot(): void
 }
 ```
 
-`extra` 会合并到每次响应的最外层。值可以是闭包，闭包在生成响应时执行。上面的 `request_id` 由应用自己生成。如果某次响应已经提供了同名字段，对应闭包不会执行。
+`extra` 合并到每次响应的最外层。值可以是闭包，生成响应时才执行。上面的 `request_id` 由应用自己生成。某次响应已经带了同名字段时，对应闭包不会执行。
 
-`success`、`code`、`message`、`data`、`meta` 和 `errors` 是保留字段。写在 `extra` 中的同名字段会被忽略。
+`success`、`code`、`message`、`data`、`meta`、`errors` 是保留字段。`extra` 里的同名字段会被忽略。
 
 ## 响应格式
 
@@ -61,9 +64,9 @@ public function boot(): void
 }
 ```
 
-`data` 没有内容时为 JSON 对象 `{}`，列表为数组。业务码放在 `code` 中。HTTP 状态单独设置，默认均为 `200`。
+`data` 为空时是 JSON 对象 `{}`，列表是数组。业务码在 `code`。HTTP 状态单独设置，默认都是 `200`。
 
-分页信息放在与 `data` 同级的 `meta` 中。页码分页：
+分页信息在 `meta`，与 `data` 同级。页码分页：
 
 ```json
 {
@@ -75,7 +78,7 @@ public function boot(): void
 }
 ```
 
-`simplePaginate` 不返回 `total`。游标分页：
+`simplePaginate` 不带 `total`。游标分页：
 
 ```json
 {
@@ -104,7 +107,7 @@ public function boot(): void
 
 ## 使用
 
-在控制器中引入 `RespondsWithJson`。`success`、`error` 和 `deny` 分别表示成功、失败和登录失效：
+在控制器中引入 `RespondsWithJson`。`success` 表示成功，`error` 表示失败，`deny` 表示未授权：
 
 ```php
 <?php
@@ -137,13 +140,13 @@ class UserController extends Controller
 }
 ```
 
-`status` 参数只改变 HTTP 状态，不改变 `code`。省略数据时，直接调用 `success`：
+`status` 只设置 HTTP 状态，`code` 仍用配置里的业务码。不返回数据时直接调用 `success`：
 
 ```php
 return $this->success();
 ```
 
-游标分页将 `paginate` 替换为 `cursorPaginate`：
+游标分页把 `paginate` 换成 `cursorPaginate`：
 
 ```php
 return $this->success(User::query()->cursorPaginate());
@@ -151,7 +154,7 @@ return $this->success(User::query()->cursorPaginate());
 
 ## API 资源
 
-让资源类继承本包提供的基类，然后像平时一样返回资源。响应字段、分页信息和响应头与 `success` 一致。未调用 `withStatus` 时，HTTP 状态使用 `http_status.success`。
+资源类继承本包的基类，返回方式和原来一样。字段、分页和响应头与 `success` 一致。没有调用 `withStatus` 时，HTTP 状态用 `http_status.success`。
 
 ```php
 <?php
@@ -201,7 +204,7 @@ public function index()
 }
 ```
 
-如果只想修改这一次响应的文案或 HTTP 状态，可以链式调用 `withMessage` 和 `withStatus`。单条资源和集合都支持：
+如果想更改本次响应的文案或 HTTP 状态，可以链式调用 `withMessage` 和 `withStatus`。单条资源和集合都支持：
 
 ```php
 return (new UserResource($user))
@@ -212,13 +215,13 @@ return (new UserCollection(User::query()->paginate()))
     ->withMessage('获取成功');
 ```
 
-执行 `php artisan stub:publish` 后，将 `stubs/resource.stub` 的父类改为 `Mitoop\Http\Resources\Resource`，将 `stubs/resource-collection.stub` 的父类改为 `Mitoop\Http\Resources\ResourceCollection`。之后 `make:resource` 会生成对应的继承关系。
+先执行 `php artisan stub:publish`，再把 `stubs/resource.stub` 的父类改成 `Mitoop\Http\Resources\Resource`，把 `stubs/resource-collection.stub` 的父类改成 `Mitoop\Http\Resources\ResourceCollection`。之后 `make:resource` 会按这个继承关系生成。
 
 ## 响应头
 
-实现 `HeaderResolverInterface`，并在服务提供者的 `register` 方法中替换默认绑定。控制器返回的响应和 API Resource 都会带上这些响应头。
+实现 `HeaderResolverInterface`，在服务提供者的 `register` 里替换默认绑定。控制器响应和 API Resource 都会带上这些头。
 
-使用参数中的 `$jsonOptions` 编码 payload，得到的字符串与响应体一致，因此可以直接用于签名：
+用参数里的 `$jsonOptions` 编码 payload，结果和响应体一致，可以直接拿去签名：
 
 ```php
 <?php
@@ -254,7 +257,7 @@ public function register(): void
 
 ## 异常处理
 
-框架的异常处理保持不变。如果希望接口异常也使用上述 JSON 结构，在应用中添加一个可调用的 `ApiExceptionRenderer`：
+框架自己的异常处理不变。接口异常也要这套 JSON 时，在应用里加一个可调用的 `ApiExceptionRenderer`：
 
 ```php
 <?php
@@ -300,9 +303,9 @@ class ApiExceptionRenderer
 }
 ```
 
-不是 JSON 请求时返回 `false`，Laravel 会继续使用原来的异常页面或重定向。
+不是 JSON 请求时返回 `false`，Laravel 会继续使用原来的异常页面或重定向。也可以去掉这个判断，让所有请求都通过统一结构返回。按需要选择。
 
-然后在 `bootstrap/app.php` 中注册。应用自己的业务异常可以用同样的方式加入 `match`：
+再到 `bootstrap/app.php` 注册。业务异常按同样方式加进 `match`：
 
 ```php
 use App\Exceptions\ApiExceptionRenderer;
