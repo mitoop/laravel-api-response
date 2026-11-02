@@ -221,13 +221,13 @@ return (new UserCollection(User::query()->paginate()))
     ->withMessage('获取成功');
 ```
 
-先执行 `php artisan stub:publish`，再把 `stubs/resource.stub` 的父类改成 `Mitoop\Http\Resources\Resource`，把 `stubs/resource-collection.stub` 的父类改成 `Mitoop\Http\Resources\ResourceCollection`。之后 `make:resource` 会按这个继承关系生成。
+发布资源模板后，`make:resource` 会按本包的继承关系自动生成。执行 `php artisan stub:publish`，将 `stubs/resource.stub` 的父类改为 `Mitoop\Http\Resources\Resource`，将 `stubs/resource-collection.stub` 的父类改为 `Mitoop\Http\Resources\ResourceCollection`。
 
-## 响应头
+## 响应头（可选）
 
-实现 `HeaderResolverInterface`，在服务提供者的 `register` 里替换默认绑定。控制器响应和 API Resource 都会带上这些头。
+默认不加自定义响应头。需要附加响应头时，实现 `HeaderResolverInterface`，并在服务提供者的 `register` 里替换默认绑定，例如给响应报文加签名。控制器响应和 API Resource 都会带上这些头。
 
-用参数里的 `$jsonOptions` 编码 payload，结果和响应体一致，可以直接拿去签名：
+用参数里的 `$jsonOptions` 编码 payload，结果和响应体一致：
 
 ```php
 <?php
