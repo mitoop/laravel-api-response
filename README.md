@@ -263,7 +263,7 @@ public function register(): void
 
 ## 异常处理
 
-框架自己的异常处理不变。接口异常也要这套 JSON 时，在应用里加一个可调用的 `ApiExceptionRenderer`：
+框架自己的异常处理不变。接口异常也要这套 JSON 时，可以加一个 `ApiExceptionRenderer`：
 
 ```php
 <?php
