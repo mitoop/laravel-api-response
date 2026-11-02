@@ -1,6 +1,31 @@
 <h2 align="center">🍎 为 Laravel API 提供统一的 JSON 响应格式</h2>
 
-Laravel API Response 为接口提供统一的 JSON 结构。成功和失败都包含 `success`、`code`、`message`、`data`。失败再带 `errors`，分页再带 `meta`。已有的 API Resource 几乎不用改动，返回时就会套用同一套格式。
+```json
+{
+  "success": true,
+  "code": 0,
+  "message": "ok",
+  "data": [
+    {
+      "id": 1,
+      "name": "Ada"
+    }
+  ],
+  "meta": {
+    "pagination": "page",
+    "page": 1,
+    "page_size": 20,
+    "has_more": false,
+    "total": 100
+  }
+}
+```
+
+- 支持成功、失败和登录失效
+- 支持页码分页和游标分页
+- 几乎零改动即可支持 API Resource
+- 支持自定义响应头
+- 接口异常也可以按同一套格式返回
 
 ## 环境要求
 
