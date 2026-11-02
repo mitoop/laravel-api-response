@@ -16,7 +16,7 @@
     "page": 1,
     "page_size": 20,
     "has_more": false,
-    "total": 100
+    "total": 1
   }
 }
 ```
@@ -101,7 +101,7 @@ public function boot(): void
   "page": 1,
   "page_size": 20,
   "has_more": false,
-  "total": 100
+  "total": 1
 }
 ```
 
