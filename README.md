@@ -21,7 +21,7 @@
 }
 ```
 
-- 支持成功、失败和认证失效三种响应
+- 支持成功、失败和认证失败三种响应
 - 支持页码分页和游标分页
 - 几乎零改动即可支持 API Resource
 - 支持自定义响应头
@@ -46,7 +46,7 @@ composer require mitoop/laravel-api-response
 
 | 配置                                                             | 默认值                          |
 | ---------------------------------------------------------------- | ------------------------------- |
-| 成功 `success` / 失败 `error` / 认证失效 `deny` | 业务码 `0` / `1` / `-1` |
+| 成功 `success` / 失败 `error` / 认证失败 `deny` | 业务码 `0` / `1` / `-1` |
 | `message.success` / `message.error` / `message.deny`             | `ok` / `error` / `unauthorized` |
 | `http_status.success` / `http_status.error` / `http_status.deny` | HTTP 状态 `200` / `200` / `200` |
 
@@ -144,9 +144,23 @@ public function boot(): void
 }
 ```
 
+**认证失败响应：**
+
+```json
+{
+  "success": false,
+  "code": -1,
+  "message": "登录信息已失效，请重新登录",
+  "data": {},
+  "errors": {}
+}
+```
+
+业务码默认是 `-1`。没有字段错误时，`errors` 是空对象 `{}`。
+
 ## 使用
 
-在控制器中引入 `RespondsWithJson`。`success` 表示成功，`error` 表示失败，`deny` 表示未授权：
+在控制器中引入 `RespondsWithJson`。`success` 表示成功，`error` 表示失败，`deny` 表示认证失败：
 
 ```php
 <?php
